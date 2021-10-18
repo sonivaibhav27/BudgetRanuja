@@ -1,20 +1,30 @@
+import {StackNavigationProp} from '@react-navigation/stack';
 import React from 'react';
-import {StyleSheet, Text, View, Platform} from 'react-native';
+import {StyleSheet, Text, View, Platform, Pressable} from 'react-native';
+import {MainStackScreenType} from '../../../navigations/MainStack/types';
 
 interface CardProps {
   category: string;
   amount: number;
   date: Date;
+  navigation: StackNavigationProp<MainStackScreenType, 'Detail'>;
 }
 
 export default (props: CardProps) => {
+  const navigateToDetailAboutOneCategory = () => {
+    props.navigation.navigate('DetailAboutOneCategory', {
+      categoryName: props.category,
+    });
+  };
   return (
-    <View style={styles.container}>
+    <Pressable
+      onPress={navigateToDetailAboutOneCategory}
+      style={styles.container}>
       <View>
         <Text style={styles.categoryText}>{props.category}</Text>
       </View>
       <Text style={styles.amount}>{props.amount}</Text>
-    </View>
+    </Pressable>
   );
 };
 

@@ -54,4 +54,5 @@ export const ColorsTheme = {
     borderColor: '#e0392d',
   },
   backgroundBanner: '#f1f1f1',
+  primary: '#595DE5',
 };

@@ -1,9 +1,14 @@
 import React from 'react';
 import {Pressable, StyleSheet, Text} from 'react-native';
+import {useRecoilValue} from 'recoil';
+import {UtilsAtom} from '../../../State';
 
 export default ({onPress}: {onPress: () => void}) => {
+  const colorTheme = useRecoilValue(UtilsAtom.ThemeAtom);
   return (
-    <Pressable onPress={onPress} style={styles.container}>
+    <Pressable
+      onPress={onPress}
+      style={[styles.container, {backgroundColor: colorTheme.primary}]}>
       <Text style={styles.textStyle}>Go to Detail</Text>
     </Pressable>
   );

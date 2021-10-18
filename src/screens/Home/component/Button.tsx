@@ -41,7 +41,7 @@ export default (props: Props) => {
           styles.chevronRightContainer,
           {backgroundColor: props.backgroundColor},
         ]}>
-        <Icons.Entypo name="chevron-right" size={20} color="#000" />
+        <Icons.Entypo name="plus" size={20} color="#000" />
       </View>
     </Pressable>
   );
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderWidth: 0.8,
+    borderWidth: 2,
     padding: 10,
     marginHorizontal: 10,
     borderRadius: 10,

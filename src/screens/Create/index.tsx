@@ -1,18 +1,19 @@
 import React from 'react';
-import {Platform, Pressable, Text, View} from 'react-native';
+import {Platform, Pressable, Text, View, StyleSheet} from 'react-native';
 import {StackScreenProps} from '@react-navigation/stack';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import {useRecoilValue} from 'recoil';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {RowItem} from './component';
-import {Header} from '../../common';
 import {DayJs} from '../../utils';
-import {StyleSheet} from 'react-native';
+import {UtilsAtom} from '../../State';
 
 type Props = StackScreenProps<MainStackScreenType, 'Create'>;
 
 export default ({route}: Props) => {
   const [date, setDate] = React.useState(DayJs.todayDate());
   const [openDatePicker, setOpenDatePicker] = React.useState(false);
+  const colorTheme = useRecoilValue(UtilsAtom.ThemeAtom);
   return (
     <View>
       {route.params.comingFrom === 'expense' ? (
@@ -51,7 +52,8 @@ export default ({route}: Props) => {
       )}
 
       <View>
-        <Pressable style={styles.saveContainer}>
+        <Pressable
+          style={[styles.saveContainer, {backgroundColor: colorTheme.primary}]}>
           <Text style={styles.saveText}>Save</Text>
         </Pressable>
       </View>
