@@ -14,12 +14,17 @@ const Audit = ({text, amount}: AuditProps) => {
   );
 };
 
+const Separator = () => {
+  return <View style={styles.separator} />;
+};
+
 export default () => {
   return (
     <View style={styles.container}>
       <Audit text="budget" amount={1000} />
+      <Separator />
       <Audit text="income" amount={2000} />
-
+      <Separator />
       <Audit text="expense" amount={2000} />
     </View>
   );
@@ -28,7 +33,7 @@ export default () => {
 const styles = StyleSheet.create({
   container: {
     // backgroundColor: 'rgb(89,93,229)',
-    backgroundColor: '#A35E00',
+    backgroundColor: '#f1f1f1',
     flex: 1,
     flexDirection: 'row',
     padding: 10,
@@ -41,12 +46,18 @@ const styles = StyleSheet.create({
   auditHeaderText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#000',
+    color: '#444',
     textTransform: 'capitalize',
   },
   auditAmountText: {
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#A35E00',
     fontSize: 18,
+  },
+  separator: {
+    borderLeftWidth: 2,
+    borderColor: '#000',
+    height: 30,
+    alignSelf: 'center',
   },
 });

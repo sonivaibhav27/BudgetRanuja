@@ -2,6 +2,7 @@ import {StackScreenProps} from '@react-navigation/stack';
 import React from 'react';
 import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {useRecoilCallback} from 'recoil';
+import {BillOperations} from '../../database';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {DataAtom} from '../../State/Atoms/Detail';
 import {GlobalStyle} from '../../theme&styles';
@@ -10,38 +11,38 @@ import {TotalSection} from './components';
 type Props = StackScreenProps<MainStackScreenType, 'DetailAboutOneCategory'>;
 
 type FlatlistItemProp = {
-  item: {date: Date; amount: string};
+  item: {billDate: Date; billAmount: string};
   index: number;
 };
-type DataProp = {date: Date; amount: string}[];
+type DataProp = {billDate: Date; billAmount: string}[];
 
 type RenderFlatlistWithDataProps = {
-  data: DataProp;
+  data: DataProp | null;
 };
 
 const RenderFlatlistWithData = ({data}: RenderFlatlistWithDataProps) => {
-  React.useEffect(() => {
-    const data = GetDataFromRecoil();
-    console.log({data});
-  }, []);
+  // React.useEffect(() => {
+  //   const data = GetDataFromRecoil();
+  //   console.log({data});
+  // }, []);
 
-  const GetDataFromRecoil = useRecoilCallback(({snapshot}) => () => {
-    return snapshot.getLoadable(DataAtom).contents;
-  });
+  // const GetDataFromRecoil = useRecoilCallback(({snapshot}) => () => {
+  //   return snapshot.getLoadable(DataAtom).contents;
+  // });
 
   const renderItem = ({item, index}: FlatlistItemProp) => {
     return (
       <View style={styles.rowContainer}>
         <View style={styles.dateAndNumberContainer}>
           <Text style={[styles.commonTextStyle, styles.numberTextStyle]}>
-            {index + 1}.
+            {index + 1}.{' '}
           </Text>
           <Text style={[styles.commonTextStyle, styles.dateTextStyle]}>
-            16/07/{item.date.getFullYear()}
+            {item.billDate}
           </Text>
         </View>
         <Text style={[styles.commonTextStyle, styles.amountTextStyle]}>
-          ${item.amount}
+          ${item.billAmount}
         </Text>
       </View>
     );
@@ -61,12 +62,8 @@ const RenderFlatlistWithData = ({data}: RenderFlatlistWithDataProps) => {
   );
 };
 
-const Data: DataProp = new Array(1000).fill({
-  date: new Date(),
-  amount: '200',
-});
-
 export default (props: Props) => {
+  const [categoryData, setCategoryData] = React.useState(null);
   const onGenerateReportButtonPressed = () => {};
   React.useEffect(() => {
     props.navigation.setOptions({
@@ -80,10 +77,25 @@ export default (props: Props) => {
         );
       },
     });
+    getAllDataForOneCategory();
   }, []);
+
+  const getAllDataForOneCategory = async () => {
+    const data = await BillOperations.getBillsByCategories(
+      props.route.params.categoryName,
+    );
+    setCategoryData(data);
+  };
+  if (categoryData === null) {
+    return (
+      <View>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
   return (
     <View style={styles.flex}>
-      <RenderFlatlistWithData data={Data} />
+      <RenderFlatlistWithData data={categoryData} />
       <TotalSection amount={20000} />
     </View>
   );

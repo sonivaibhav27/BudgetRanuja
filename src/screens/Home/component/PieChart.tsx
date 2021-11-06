@@ -24,7 +24,6 @@ export default () => {
     const expenseAfterGrouped = React.useMemo(() => {
       return GroupByCategories(expenseBills);
     }, [expenseBills]);
-    Logger.consoleLog(shuffleArray(expenseAfterGrouped), 'warn');
     const sumOfExpenses: number = expenseAfterGrouped.reduce((prev, curr) => {
       return prev + curr.billAmount!;
     }, 0);
@@ -48,14 +47,22 @@ export default () => {
             parent: {
               overflow: 'visible',
             },
+            data: {
+              fill: ({datum}) => datum.fill,
+            },
           }}
+          containerComponent={<VictoryContainer responsive={true} />}
           innerRadius={80}
           labelComponent={
             <VictoryLabel
               angle={arg => {
-                return `${(arg.index + 0.5) * -15}`;
+                return `${(+arg.index + 0.5) * -15}`;
               }}
-              style={{fontSize: 9}}
+              style={{
+                fontSize: 9,
+                fill: ({datum}) => datum.fill,
+                fontWeight: 'bold',
+              }}
             />
           }
         />

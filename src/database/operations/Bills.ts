@@ -63,12 +63,12 @@ export const getBillsByCategories = async (category: string) => {
       .fetch();
     const sanitize = bills.map(bill => {
       return {
-        billCategory: bill.billCategory,
         billAmount: bill.billAmount,
         billDate: bill.billDate,
       };
     });
     Logger.consoleLog(sanitize, 'log');
+    return sanitize;
   } catch (err) {
     Logger.consoleLog('Error in getting individual Category ' + err, 'error');
   }
