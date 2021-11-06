@@ -27,7 +27,8 @@ export default () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'rgb(89,93,229)',
+    // backgroundColor: 'rgb(89,93,229)',
+    backgroundColor: '#A35E00',
     flex: 1,
     flexDirection: 'row',
     padding: 10,
@@ -40,7 +41,7 @@ const styles = StyleSheet.create({
   auditHeaderText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#fff',
+    color: '#000',
     textTransform: 'capitalize',
   },
   auditAmountText: {

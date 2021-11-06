@@ -14,7 +14,7 @@ export default appSchema({
         },
         {
           name: 'Date',
-          type: 'string',
+          type: 'number',
         },
         {
           name: 'Remark',
@@ -23,11 +23,24 @@ export default appSchema({
         },
         {
           name: 'Type',
-          type: 'string',
+          type: 'number',
         },
         {
           name: 'Category',
           type: 'string',
+        },
+      ],
+    }),
+    tableSchema({
+      name: DatabaseConfig.tables.Budget,
+      columns: [
+        {
+          name: 'DateAsMonthAndYear',
+          type: 'number',
+        },
+        {
+          name: 'BudgetAmount',
+          type: 'number',
         },
       ],
     }),

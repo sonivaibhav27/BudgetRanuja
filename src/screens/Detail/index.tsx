@@ -36,7 +36,6 @@ const monthNames = [
   'November',
   'December',
 ];
-
 const formateDateToGetMonthAndYear = (date: Date) => {
   return `${monthNames[date.getMonth()]}, ${date.getFullYear()}`;
 };
@@ -44,7 +43,8 @@ export default (props: Props) => {
   const {height} = useWindowDimensions();
   const [month, setMonth] = React.useState(new Date());
   const [monthPickerVisible, setMonthPickerVisible] = React.useState(false);
-
+  // BillOperations.createBill('card', 200000, 'Hello', new Date(), 'income');
+  // BillOperations.getBills();
   React.useEffect(() => {
     props.navigation.setOptions({
       headerRight: () => {

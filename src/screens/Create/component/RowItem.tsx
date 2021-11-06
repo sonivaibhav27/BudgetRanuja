@@ -23,13 +23,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   valueContainer: {
-    backgroundColor: '#F3F3F3',
+    // backgroundColor: '#F3F3F3',
     flex: 1,
     padding: 10,
     borderRadius: 8,
+    backgroundColor: '#f1f1f1',
   },
   textStyle: {
     flex: 0.5,
     color: '#000',
+    fontWeight: '600',
+    marginRight: 15,
   },
 });

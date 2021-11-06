@@ -1,3 +1,5 @@
+import {StyleSheet} from 'react-native';
+
 //@flow
 export const Font = {
   Bold: 'OpenSans-Bold',
@@ -8,7 +10,7 @@ export const Font = {
 
 export const TextStyle = {
   h1: {
-    fontFamily: Font.Regular,
+    fontFamily: Font.Bold,
     fontSize: 25,
   },
   header: {
@@ -16,4 +18,14 @@ export const TextStyle = {
     fontSize: 20,
     color: '#000',
   },
+  text: {
+    fontFamily: Font.SemiBold,
+  },
 };
+
+export const GlobalCommonStyles = StyleSheet.create({
+  textStyle: {
+    color: '#000',
+    ...TextStyle.text,
+  },
+});

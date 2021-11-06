@@ -1,21 +1,36 @@
 /**
  * @format
  */
-
 import {AppRegistry} from 'react-native';
 import * as Sentry from '@sentry/react-native';
-
 import App from './App';
 import {name as appName} from './app.json';
-import {DatabaseSetup} from './src/database';
-import {Keys} from './src/config';
+import {BudgetBillModel, Schema, BudgetModel} from './src/database';
+import {DatabaseConfig, Keys} from './src/config';
+import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
+import {Database} from '@nozbe/watermelondb';
+import migrations from './src/database/_init/migrations';
 
 Sentry.init({
   dsn: Keys.REMOTE_LOGGER_KEY,
   enableAutoSessionTracking: true,
   environment: __DEV__ ? 'development' : 'production',
+  enableNative: false,
 });
 
-const database = DatabaseSetup();
+const adapter = new SQLiteAdapter({
+  schema: Schema,
+  jsi: false,
+  dbName: DatabaseConfig.dbName,
+  onSetUpError: error => {
+    // Database failed to load -- offer the user to reload the app or log out
+    console.log(error);
+  },
+  migrations: migrations,
+});
+export const WatermenlonDB = new Database({
+  adapter,
+  modelClasses: [BudgetBillModel, BudgetModel],
+});
 
 AppRegistry.registerComponent(appName, () => App);

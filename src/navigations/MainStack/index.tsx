@@ -8,9 +8,21 @@ import {
   SettingsScreen,
   DetailAboutOneCategoryScreen,
 } from '../../screens';
+import {Text, View} from 'react-native';
+import {useInitialDataOnAppLaunch} from '../../hooks';
 const Stack = createStackNavigator<MainStackScreenType>();
 
 export default () => {
+  const getDataLoadingState = useInitialDataOnAppLaunch();
+
+  if (getDataLoadingState) {
+    return (
+      <View>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -45,6 +57,11 @@ export default () => {
       <Stack.Screen
         name="DetailAboutOneCategory"
         component={DetailAboutOneCategoryScreen}
+        options={({route}) => {
+          return {
+            headerTitle: route.params.categoryName || '',
+          };
+        }}
       />
     </Stack.Navigator>
   );

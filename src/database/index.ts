@@ -1,4 +1,5 @@
 import Schema from './_init/schema';
-import {BudgetBillModel} from './_init/models';
-import DatabaseSetup from './_init/DatabaseSetup';
-export {Schema, BudgetBillModel, DatabaseSetup};
+import {BudgetBillModel, BudgetModel} from './_init/models';
+export {Schema, BudgetBillModel, BudgetModel};
+export * as ModelTypes from './Types';
+export {BillOperations, BudgetOperations} from './operations';

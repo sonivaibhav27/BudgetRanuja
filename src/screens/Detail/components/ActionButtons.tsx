@@ -9,6 +9,7 @@ export default () => {
   return (
     <View style={styles.container}>
       <Pressable
+        hitSlop={{top: 5, bottom: 5}}
         onPress={() => {
           if (selected !== 'expense') {
             setSelected('expense');
@@ -21,6 +22,7 @@ export default () => {
         </Text>
       </Pressable>
       <Pressable
+        hitSlop={{top: 5, bottom: 5}}
         onPress={() => {
           if (selected !== 'income') {
             setSelected('income');
@@ -41,6 +43,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
+    justifyContent: 'center',
   },
   incomeContainer: {
     marginLeft: 15,

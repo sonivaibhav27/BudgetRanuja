@@ -1,4 +1,7 @@
+import Database from '@nozbe/watermelondb/Database';
 import {atom, selector} from 'recoil';
+import {ModelTypes} from '../../../database';
+import {GroupByCategories} from '../../../utils';
 
 interface Data {
   category: string;
@@ -7,12 +10,6 @@ interface Data {
   type: 'income' | 'expense';
 }
 
-const newDAta = new Array(6000).fill({
-  category: 'Education',
-  amount: 10000,
-  date: new Date(),
-  type: 'expense',
-});
 const Data: Data[] = [
   {
     category: 'Education',
@@ -56,10 +53,217 @@ const Data: Data[] = [
     date: new Date(),
     type: 'expense',
   },
+  {
+    category: 'Education',
+    amount: 200,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Travel',
+    amount: 400,
+    date: new Date(Date.now()),
+    type: 'expense',
+  },
+  {
+    category: 'Income',
+    amount: 4000,
+    date: new Date(Date.now()),
+    type: 'income',
+  },
+  {
+    category: 'Education',
+    amount: 10000,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Education',
+    amount: 200,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Travel',
+    amount: 700,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Groceries',
+    amount: 200,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Education',
+    amount: 200,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Travel',
+    amount: 400,
+    date: new Date(Date.now()),
+    type: 'expense',
+  },
+  {
+    category: 'Income',
+    amount: 4000,
+    date: new Date(Date.now()),
+    type: 'income',
+  },
+  {
+    category: 'Education',
+    amount: 10000,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Education',
+    amount: 200,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Travel',
+    amount: 700,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Groceries',
+    amount: 200,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Education',
+    amount: 200,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Travel',
+    amount: 400,
+    date: new Date(Date.now()),
+    type: 'expense',
+  },
+  {
+    category: 'Income',
+    amount: 4000,
+    date: new Date(Date.now()),
+    type: 'income',
+  },
+  {
+    category: 'Education',
+    amount: 10000,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Education',
+    amount: 200,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Travel',
+    amount: 700,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Groceries',
+    amount: 200,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Education',
+    amount: 200,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Travel',
+    amount: 400,
+    date: new Date(Date.now()),
+    type: 'expense',
+  },
+  {
+    category: 'Income',
+    amount: 4000,
+    date: new Date(Date.now()),
+    type: 'income',
+  },
+  {
+    category: 'Education',
+    amount: 10000,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Education',
+    amount: 200,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Travel',
+    amount: 700,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Groceries',
+    amount: 200,
+    date: new Date(),
+    type: 'expense',
+  },
+  {
+    category: 'Income',
+    amount: 123,
+    date: new Date(),
+    type: 'income',
+  },
 ];
 export const selectedType = atom({
   key: 'selectedType',
   default: 'expense',
+});
+
+// export const DataAtom = atom({
+//   key: 'DataAtom',
+//   default: Data,
+// });
+
+export const ExpensesAtom = atom({
+  key: 'ExpensesAtom',
+  default: [] as ModelTypes.BillTypes[],
+});
+
+export const IncomeAtom = atom({
+  key: 'IncomeAtom',
+  default: [] as ModelTypes.BillTypes[],
+});
+
+export const incomeAndExpenseTotalForAMonthAtom = selector({
+  key: 'incomeAmountSelector',
+  get: ({get}) => {
+    const expenses = get(ExpensesAtom);
+    const incomes = get(IncomeAtom);
+    const totalIncome = incomes.reduce((prev, current) => {
+      return prev + current.billAmount!;
+    }, 0);
+    const totalExpense = expenses.reduce((prev, current) => {
+      return prev + current.billAmount!;
+    }, 0);
+    return {
+      totalIncome,
+      totalExpense,
+    };
+  },
 });
 
 export const dataForDetail = selector({
@@ -67,33 +271,16 @@ export const dataForDetail = selector({
   get: ({get}) => {
     const getSelectedType = get(selectedType);
     if (getSelectedType === 'expense') {
-      const filtered = Data.filter(data => {
-        return data.type === 'expense';
-      });
-      const seenType: string[] = [];
-      const returned: Data[] = [];
-      for (let i = 0; i < filtered.length; i++) {
-        if (seenType.includes(filtered[i].category)) {
-          const find = returned.find(data => {
-            return data.category === filtered[i].category;
-          });
-
-          filtered[i].amount = filtered[i].amount + find?.amount;
-          if (find) {
-            var index = returned.indexOf(find);
-            returned.splice(index, 1);
-            returned.push(filtered[i]);
-          }
-        } else {
-          seenType.push(filtered[i].category);
-          returned.push(filtered[i]);
-        }
-      }
-
-      return returned;
+      const filtered = get(ExpensesAtom);
+      return GroupByCategories(filtered);
+    } else {
+      const incomeFiltered = get(IncomeAtom);
+      return GroupByCategories(incomeFiltered);
     }
-    return Data.filter(data => {
-      return data.type === 'income';
-    });
   },
+});
+
+export const DatabaseAtom = atom<Database | null>({
+  key: 'databaseAtom',
+  default: null,
 });

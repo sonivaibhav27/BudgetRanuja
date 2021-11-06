@@ -1,6 +1,7 @@
 import {StackNavigationProp} from '@react-navigation/stack';
 import React from 'react';
 import {View, useWindowDimensions, StyleSheet} from 'react-native';
+import {BottomSheet} from '../../common';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {
   Header,
@@ -16,9 +17,14 @@ interface Props {
 
 export default ({navigation}: Props) => {
   const {height} = useWindowDimensions();
+  const [bottomSheetVisibile, setBottomSheetVisible] = React.useState(false);
 
   const navigateToDetailScreen = () => {
     navigation.navigate('Detail');
+  };
+
+  const toggleBottomSheet = () => {
+    setBottomSheetVisible(prev => !prev);
   };
 
   return (
@@ -27,7 +33,7 @@ export default ({navigation}: Props) => {
         <Header />
       </View>
       <View style={[styles.budgetSection, {height: height * 0.1}]}>
-        <BudgetSection />
+        <BudgetSection toggleBottomSheet={toggleBottomSheet} />
       </View>
       <View style={styles.pieChart}>
         <PieChart />
@@ -38,6 +44,9 @@ export default ({navigation}: Props) => {
       <View>
         <DetailButton onPress={navigateToDetailScreen} />
       </View>
+      {bottomSheetVisibile && (
+        <BottomSheet closeBottomSheet={toggleBottomSheet} />
+      )}
     </View>
   );
 };

@@ -2,12 +2,17 @@ import React from 'react';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {MainStackScreenType} from '../../../navigations/MainStack/types';
 import Button from './Button';
+import {useRecoilValue} from 'recoil';
+import {DetailState} from '../../../State/Atoms';
 
 interface Props {
   navigation: StackNavigationProp<MainStackScreenType, 'Home'>;
 }
 
 export default ({navigation}: Props) => {
+  const totalAmountSelector = useRecoilValue(
+    DetailState.incomeAndExpenseTotalForAMonthAtom,
+  );
   const navigateToCreateScreen = (comingFrom: 'income' | 'expense') => {
     navigation.navigate('Create', {
       comingFrom: comingFrom,
@@ -20,7 +25,7 @@ export default ({navigation}: Props) => {
         backgroundColor="#e4f7e6"
         borderColor="#40c94f"
         text="income"
-        totalAmount={3000}
+        totalAmount={totalAmountSelector.totalIncome}
         onPress={navigateToCreateScreen}
       />
       <Button
@@ -28,7 +33,7 @@ export default ({navigation}: Props) => {
         borderColor="red"
         // borderColor={currentTheme.expense.borderColor}
         text="expense"
-        totalAmount={3500}
+        totalAmount={totalAmountSelector.totalExpense}
         onPress={navigateToCreateScreen}
       />
     </>

@@ -130,6 +130,9 @@ android {
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
+    packagingOptions {
+     pickFirst '**/libc++_shared.so' // ⬅️ This (if missing)
+  }
 
     defaultConfig {
         applicationId "com.ranujabudget"
@@ -199,7 +202,7 @@ dependencies {
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.fbjni'
     }
-
+    implementation project(':watermelondb-jsi')
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.flipper'
         exclude group:'com.squareup.okhttp3', module:'okhttp'
