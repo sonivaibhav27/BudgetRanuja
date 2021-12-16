@@ -1,5 +1,10 @@
 import Schema from './_init/schema';
-import {BudgetBillModel, BudgetModel} from './_init/models';
-export {Schema, BudgetBillModel, BudgetModel};
-export * as ModelTypes from './Types';
-export {BillOperations, BudgetOperations} from './operations';
+import {BudgetBillModel, BudgetModel, CategoryModel} from './_init/models';
+export {Schema, BudgetBillModel, BudgetModel, CategoryModel};
+export {
+  BillOperations,
+  BudgetOperations,
+  CommonOperations,
+  CategoryOperations,
+  CurrencyOperations,
+} from './operations';

@@ -1,11 +1,12 @@
 import React from 'react';
 import {Text, View, StyleSheet} from 'react-native';
+import {Theme} from '../../../theme&styles';
 
 export default (props: {amount: number}) => {
   if (typeof props.amount !== 'undefined') {
     return (
       <View style={styles.container}>
-        <Text style={styles.textStyle}>Total : {props.amount}</Text>
+        <Text style={styles.textStyle}>Total Amount : {props.amount}</Text>
       </View>
     );
   }
@@ -14,13 +15,14 @@ export default (props: {amount: number}) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'red',
-    padding: 20,
+    backgroundColor: '#fff',
+    padding: 15,
+    elevation: 2,
   },
   textStyle: {
-    fontSize: 25,
-    color: '#FFF',
+    fontSize: 24,
+    color: Theme.ColorsTheme.primary,
     textAlign: 'center',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
 });

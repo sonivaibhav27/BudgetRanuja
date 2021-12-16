@@ -7,7 +7,6 @@ import {
   Animated,
   Easing,
   Dimensions,
-  FlatList,
 } from 'react-native';
 import {MainStackScreenType} from '../navigations/MainStack/types';
 import {GlobalStyle} from '../theme&styles';
@@ -18,9 +17,12 @@ const {height} = Dimensions.get('window');
 
 type Props = {
   navigation: StackNavigationProp<MainStackScreenType, 'Settings'>;
-  closeModal: () => void;
+  closeModal: (
+    typeOfScreen: 'Currency' | 'Categories' | 'Delete Bills',
+  ) => void;
   title: string;
-  data: string[];
+  data?: string[];
+  children: JSX.Element | JSX.Element[];
 };
 
 export default (props: Props) => {
@@ -46,21 +48,11 @@ export default (props: Props) => {
       useNativeDriver: true,
       easing: Easing.inOut(Easing.ease),
     }).start(() => {
-      props.closeModal();
+      props.closeModal('Categories');
     });
     props.navigation.setOptions({
       headerShown: true,
     });
-  };
-  const renderItem = ({item}: {item: any}) => {
-    return (
-      <PressableButton
-        onPress={() => _onItemSelect(item)}
-        style={styles.itemContainer}>
-        <Text style={styles.text}>{item.cc}</Text>
-        <Text style={styles.symbol}>{item.symbol}</Text>
-      </PressableButton>
-    );
   };
 
   return (
@@ -84,18 +76,13 @@ export default (props: Props) => {
         <View style={styles.crossButtonContainer}>
           <PressableButton onPress={_closeModal}>
             <View>
-              <Icons.Entypo name="cross" size={25} color="#000" />
+              <Icons.Entypo name="cross" size={25} color="#444" />
             </View>
           </PressableButton>
         </View>
         <Text style={styles.headerText}>{props.title}</Text>
       </View>
-      <FlatList
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        keyExtractor={item => item.cc}
-        data={props.data}
-        renderItem={renderItem}
-      />
+      {props.children}
     </Animated.View>
   );
 };
@@ -107,7 +94,7 @@ const styles = StyleSheet.create({
   crossButtonContainer: {
     padding: 6,
     borderRadius: 100,
-    backgroundColor: '#EEE',
+    backgroundColor: '#EFEFEF',
     alignSelf: 'flex-end',
     position: 'absolute',
     top: 10,
@@ -115,7 +102,6 @@ const styles = StyleSheet.create({
   },
   headerText: {
     ...GlobalStyle.TextStyle.header,
-    fontFamily: GlobalStyle.Font.Bold,
   },
   header: {
     justifyContent: 'center',
@@ -125,21 +111,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     backgroundColor: 'white',
   },
-  text: {
-    fontSize: 16,
-    color: '#000',
-  },
-  itemContainer: {
-    padding: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginHorizontal: 20,
-  },
-  symbol: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
-  },
+
   separator: {
     borderBottomWidth: 1,
     borderBottomColor: '#EEE',

@@ -1,1 +1,8 @@
-export default ['Card', 'Cash'];
+export default [
+  {
+    categoryName: 'Card',
+  },
+  {
+    categoryName: 'Cash',
+  },
+];

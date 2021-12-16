@@ -4,7 +4,7 @@ import {Pressable, ViewStyle} from 'react-native';
 interface Props {
   children: JSX.Element | JSX.Element[];
   onPress: () => void;
-  style: ViewStyle;
+  style?: ViewStyle | ViewStyle[];
   disable?: boolean;
 }
 

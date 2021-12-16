@@ -18,6 +18,7 @@ export default (props: Props) => {
 const styles = StyleSheet.create({
   container: {
     paddingTop: 10,
+    marginBottom: 10,
   },
   title: {
     color: '#000',

@@ -14,8 +14,7 @@ export default () => {
           if (selected !== 'expense') {
             setSelected('expense');
           }
-        }}
-        style={styles.expenseContainer}>
+        }}>
         <Text
           style={[styles.textStyle, selected === 'expense' && styles.selected]}>
           Expense
@@ -54,9 +53,9 @@ const styles = StyleSheet.create({
   },
   selected: {
     backgroundColor: 'rgb(89,93,229)',
-    padding: 8,
+    padding: 7,
     borderRadius: 8,
     color: '#fff',
-    fontWeight: '700',
+    fontWeight: '600',
   },
 });

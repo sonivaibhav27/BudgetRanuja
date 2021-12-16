@@ -1,34 +1,53 @@
 import {Q} from '@nozbe/watermelondb';
 import {WatermenlonDB} from '../../..';
 import {DatabaseConfig} from '../../config';
-import {Logger} from '../../utils';
-import {BudgetTypes} from '../Types';
+import {BudgetModelType} from '../../types';
+import {DayJs, Logger, Toast} from '../../utils';
 
 class BudgetOperations {
   static async getCurrentMonthBudget(monthAndYear: number) {
-    const getBudget: BudgetTypes[] = await WatermenlonDB.get(
+    const getBudget: BudgetModelType[] = await WatermenlonDB.get(
       DatabaseConfig.tables.Budget,
     )
-      .query(Q.where('DateAsMonthAndYear', monthAndYear))
+      .query(Q.where('DateAsYearAndMonth', monthAndYear))
       .fetch();
     if (getBudget.length === 0) {
-      return null;
+      return undefined;
+    }
+    if (getBudget.length > 1) {
+      return getBudget[getBudget.length - 1].BudgetAmount;
     }
     return getBudget[0].BudgetAmount;
   }
 
-  static async upsertBudget(budgetAmount: number, monthAndYear: number) {
+  static async upsertBudget(budgetAmount: number) {
+    const monthAndYear = DayJs.getCurrentYearAndMonth();
     try {
-      WatermenlonDB.write(async () => {
-        await WatermenlonDB.get(DatabaseConfig.tables.Budget).create(
-          (budget: BudgetTypes) => {
-            budget.BudgetAmount = budgetAmount;
-            budget.DateAsMonthAndYear = monthAndYear;
-          },
-        );
-      });
+      const getBudget: BudgetModelType[] = await WatermenlonDB.get(
+        DatabaseConfig.tables.Budget,
+      )
+        .query(Q.where('DateAsYearAndMonth', monthAndYear))
+        .fetch();
+      if (getBudget.length === 0) {
+        await WatermenlonDB.write(async () => {
+          await WatermenlonDB.get(DatabaseConfig.tables.Budget).create(
+            (budget: BudgetModelType) => {
+              budget.BudgetAmount = budgetAmount;
+              budget.DateAsYearAndMonth = monthAndYear;
+            },
+          );
+        });
+        Toast('Budget set successfully.');
+      } else {
+        await WatermenlonDB.write(async () => {
+          getBudget[0].update(budgetToUpdate => {
+            budgetToUpdate.BudgetAmount = budgetAmount;
+          });
+        });
+        Toast('Budget update successfully.');
+      }
 
-      Logger.consoleLog('Set successfully.', 'warn');
+      // Logger.consoleLog('Set successfully.', 'warn');
     } catch (err) {
       Logger.consoleLog(err, 'error');
     }

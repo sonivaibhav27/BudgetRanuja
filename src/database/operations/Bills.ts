@@ -1,52 +1,148 @@
 import {Q} from '@nozbe/watermelondb';
-import {ModelTypes} from '../index';
 import {DatabaseConfig} from '../../config';
-import {Logger} from '../../utils';
+import {DayJs, Logger, Toast} from '../../utils';
 import {WatermenlonDB} from '../../..';
-import {ExpenseCategories} from '../../data';
+import {
+  BillModelType,
+  OnlyInformationFromBillType,
+  TCSVBills,
+} from '../../types';
+import {CategoryOperations} from '.';
 
 export const createBill = async (
-  billCategory: string,
-  amount: number,
+  categoryId: string,
+  amount: string,
   date: Date,
   typeOfBill: string,
+  isRepeatDaily?: boolean,
   remark?: string,
-): Promise<ModelTypes.BillTypes | undefined> => {
-  const billType = typeOfBill === 'income' ? 1 : 2;
-  let record;
-  await WatermenlonDB.write(async () => {
-    record = await WatermenlonDB.collections
-      .get(DatabaseConfig.tables.BudgetBills)
-      .create((budgetBills: ModelTypes.BillTypes) => {
-        budgetBills.billAmount = amount;
-        budgetBills.billCategory = billCategory;
-        budgetBills.billDate = 21492;
-        budgetBills.billType = billType;
-        budgetBills.billRemark = remark;
+): Promise<BillModelType | undefined> => {
+  if (
+    categoryId.length === 0 ||
+    typeOfBill.length === 0 ||
+    date === undefined ||
+    amount === ''
+  ) {
+    Toast('Data missing , please fill all mandatory field', 'LONG');
+    return;
+  }
+  try {
+    const billType = typeOfBill === 'income' ? 1 : 2;
+    let record;
+    if (isRepeatDaily) {
+      let bills: BillModelType[] = [];
+      const lastDateOfMonth = DayJs.getLastDayOfMonth();
+      for (let day = date.getDate(); day <= lastDateOfMonth; day++) {
+        bills.push(
+          WatermenlonDB.collections
+            .get(DatabaseConfig.tables.BudgetBills)
+            .prepareCreate((model: BillModelType) => {
+              model.billAmount = +amount;
+              model.categoryId = categoryId;
+              model.billType = billType;
+              model.billRemark = remark;
+              model.billMonthAndYear = DayJs.getCurrentYearAndMonth();
+              model.billDate = new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                day,
+              );
+            }),
+        );
+      }
+      await WatermenlonDB.write(async () => {
+        await WatermenlonDB.batch(...bills);
       });
-  });
-  return record;
+    } else {
+      await WatermenlonDB.write(async () => {
+        record = await WatermenlonDB.collections
+          .get(DatabaseConfig.tables.BudgetBills)
+          .create((budgetBills: BillModelType) => {
+            budgetBills.billAmount = +amount;
+            budgetBills.categoryId = categoryId;
+            budgetBills.billDate = date;
+            budgetBills.billType = billType;
+            budgetBills.billRemark = remark;
+            budgetBills.billMonthAndYear = DayJs.getCurrentYearAndMonth();
+          });
+      });
+    }
+    return record;
+  } catch (err) {
+    Logger.consoleLog(JSON.stringify(err), 'error');
+    // Logger.trackLog(JSON.stringify(err));
+    Toast('Something went wrong.');
+  }
 };
 
-export const getCurrentMonthBills = async () => {
+export const updateBill = async (
+  id: string,
+  amount: string,
+  date: Date,
+  typeOfBill: 'expense' | 'income',
+  remark: string,
+  categoryId: string,
+) => {
+  try {
+    const findModel = await WatermenlonDB.get(
+      DatabaseConfig.tables.BudgetBills,
+    ).find(id);
+    if (findModel) {
+      await WatermenlonDB.write(async () => {
+        await findModel.update((model: BillModelType) => {
+          model.billAmount = +amount!;
+          model.billDate = date;
+          model.billType = typeOfBill === 'income' ? 1 : 2;
+          model.billRemark = remark;
+          model.categoryId = categoryId;
+        });
+      });
+      Toast('Successfully updated the bill');
+      return;
+    }
+    throw new Error('Id not found in database.');
+  } catch (error) {
+    Toast('Error while updating the bill ' + error.message);
+  }
+};
+
+export const deleteBill = async (id: string) => {
+  try {
+    const findModel = await WatermenlonDB.get(
+      DatabaseConfig.tables.BudgetBills,
+    ).find(id);
+    if (findModel) {
+      await WatermenlonDB.write(async () => {
+        await findModel.destroyPermanently();
+      });
+      Toast('Successfully deleted the bill');
+      return true;
+    }
+    throw new Error('Id not found in database.');
+  } catch (error) {
+    Toast('Error while deleting the bill ' + error.message);
+    return false;
+  }
+};
+
+export const getCurrentMonthBills = async (forYearAndMonth: number) => {
   Logger.consoleLog('Started', 'log');
   try {
-    let bills: ModelTypes.BillTypes[] | undefined;
+    let bills: BillModelType[] | undefined;
     bills = await WatermenlonDB.collections
       .get(DatabaseConfig.tables.BudgetBills)
-      .query()
+      .query(Q.where('DateAsYearAndMonth', Q.eq(forYearAndMonth)))
       .fetch();
 
-    const sanitizeOutputBills = bills.map(bill => {
-      return {
-        billAmount: bill.billAmount,
-        billCategory: bill.billCategory,
-        billType: bill.billType,
-        billDate: bill.billDate,
-        fill: ExpenseCategories[0][bill.billCategory!],
-      };
-    });
-
+    const sanitizeOutputBills: OnlyInformationFromBillType[] = bills?.map(
+      bill => {
+        return {
+          billAmount: bill.billAmount!,
+          typeOfBill: bill.billType! === 1 ? 'income' : 'expense',
+          categoryId: bill.categoryId!,
+        };
+      },
+    );
     return sanitizeOutputBills;
   } catch (err) {
     Logger.consoleLog(`Error in Getting Bills. ${err}`, 'error');
@@ -54,96 +150,60 @@ export const getCurrentMonthBills = async () => {
   }
 };
 
-export const getBillsByCategories = async (category: string) => {
+export const getBillsByCategoriesAndMonth = async (
+  categoryId: string,
+  monthAndYear: number,
+) => {
   try {
-    let bills: ModelTypes.BillTypes[] | undefined;
+    let bills: BillModelType[] | undefined;
     bills = await WatermenlonDB.collections
       .get(DatabaseConfig.tables.BudgetBills)
-      .query(Q.where('Category', Q.eq(category)))
+      .query(
+        Q.and(
+          Q.where('Category_Id', Q.eq(categoryId)),
+          Q.where('DateAsYearAndMonth', monthAndYear),
+        ),
+      )
       .fetch();
     const sanitize = bills.map(bill => {
       return {
-        billAmount: bill.billAmount,
-        billDate: bill.billDate,
+        billAmount: bill.billAmount!,
+        billDate: bill.billDate!,
+        billRemark: bill.billRemark!,
+        categoryId: bill.categoryId!,
+        typeOfBill: bill.billType! === 1 ? 'income' : 'expense',
+        id: bill.id,
       };
     });
-    Logger.consoleLog(sanitize, 'log');
     return sanitize;
   } catch (err) {
     Logger.consoleLog('Error in getting individual Category ' + err, 'error');
+    return [];
   }
 };
 
-export const resetDatabase = async () => {
-  await WatermenlonDB.write(async () => {
-    await WatermenlonDB.unsafeResetDatabase();
-  });
+export const getBillsByDateInDetailForCSV = async (
+  dateAsYearAndMonth: number,
+) => {
+  try {
+    let bills: BillModelType[] | undefined;
+    bills = await WatermenlonDB.collections
+      .get(DatabaseConfig.tables.BudgetBills)
+      .query(Q.where('DateAsYearAndMonth', Q.eq(dateAsYearAndMonth)))
+      .fetch();
+    const sanitize: TCSVBills[] = bills.map(bill => {
+      return {
+        billAmount: bill.billAmount!,
+        billDate: bill.billDate!,
+        billRemark: bill.billRemark!,
+        billType: bill.billType! === 1 ? 'income' : 'expense',
+        categoryName:
+          CategoryOperations._rawDictionary[bill.categoryId!][0] ||
+          'Not Defined ',
+      };
+    });
+    return sanitize;
+  } catch (err) {
+    Toast('Error while getting record from database.');
+  }
 };
-
-// class BillOperations {
-//   public static instance: BillOperations;
-
-//   async createBill(
-//     database: Database | null,
-//     billCategory: string,
-//     amount: number,
-//     date: Date,
-//     typeOfBill: string,
-//     remark?: string,
-//   ): Promise<ModelTypes.BillTypes | null | undefined> {
-//     try {
-//       console.log(database);
-//       if (database) {
-//         const budgetBillCollection = database.collections.get(
-//           DatabaseConfig.tables.BudgetBills,
-//         );
-//         const billType = typeOfBill === 'income' ? 1 : 2;
-//         let record;
-//         await database.write(async () => {
-//           record = await budgetBillCollection.create(
-//             (budgetBills: ModelTypes.BillTypes) => {
-//               budgetBills.billAmount = amount;
-//               budgetBills.billCategory = billCategory;
-//               budgetBills.billDate = 21492;
-//               budgetBills.billType = billType;
-//             },
-//           );
-//           //deleting instance
-//         });
-//         database = null;
-//         return record;
-//       }
-//       // return r;
-//     } catch (err) {
-//       Logger.consoleLog(err, 'warn');
-//       Logger.consoleLog('Error while creating record ' + err, 'error');
-//       return null;
-//     }
-//   }
-//   async getCurrentMonthBills(
-//     database: Database,
-//   ): Promise<ModelTypes.BillTypes[] | null> {
-//     try {
-//       const data: ModelTypes.BillTypes[] = await database
-//         .get(DatabaseConfig.tables.BudgetBills)
-//         .query()
-//         .fetch();
-//       return data;
-//     } catch (err) {
-//       Logger.consoleLog(`Error in Getting Bills. ${err}`, 'error');
-//       return null;
-//     }
-//   }
-//   static async updateBill(bill: any) {
-//     bill.update((record: any) => {
-//       record;
-//     });
-//   }
-//   static async deleteBill(bill: ModelTypes.BillTypes) {
-//     await bill.destroyPermanently();
-//   }
-// }
-
-// BillOperations.instance = new BillOperations();
-
-// export default BillOperations;

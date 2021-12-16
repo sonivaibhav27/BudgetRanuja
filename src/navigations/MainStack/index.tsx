@@ -7,14 +7,17 @@ import {
   CreateScreen,
   SettingsScreen,
   DetailAboutOneCategoryScreen,
+  PricingScreen,
+  PieChartScreen,
+  EditCategoryScreen,
 } from '../../screens';
-import {Text, View} from 'react-native';
+import {Text, View, useWindowDimensions} from 'react-native';
 import {useInitialDataOnAppLaunch} from '../../hooks';
 const Stack = createStackNavigator<MainStackScreenType>();
 
 export default () => {
+  const {width} = useWindowDimensions();
   const getDataLoadingState = useInitialDataOnAppLaunch();
-
   if (getDataLoadingState) {
     return (
       <View>
@@ -25,9 +28,13 @@ export default () => {
 
   return (
     <Stack.Navigator
+      // initialRouteName="PieChart"
       screenOptions={{
         headerTitleStyle: {
           left: -15,
+        },
+        headerStyle: {
+          elevation: 1,
         },
       }}>
       <Stack.Screen
@@ -48,7 +55,9 @@ export default () => {
       />
       <Stack.Screen
         options={({route}) => ({
-          headerTitle: `Create ${route.params.comingFrom}`,
+          headerTitle: `${route.params.screenType || ''} ${
+            route.params.comingFrom || ''
+          }`,
         })}
         name="Create"
         component={CreateScreen}
@@ -60,8 +69,23 @@ export default () => {
         options={({route}) => {
           return {
             headerTitle: route.params.categoryName || '',
+            headerTitleStyle: {
+              maxWidth: width * 0.35,
+              left: -20,
+            },
           };
         }}
+      />
+      <Stack.Screen name="Pricing" component={PricingScreen} />
+      <Stack.Screen
+        name="PieChart"
+        options={{headerTitle: 'Graph'}}
+        component={PieChartScreen}
+      />
+      <Stack.Screen
+        options={{title: 'Add/Edit'}}
+        name="EditCategory"
+        component={EditCategoryScreen}
       />
     </Stack.Navigator>
   );

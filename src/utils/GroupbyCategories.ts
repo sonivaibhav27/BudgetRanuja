@@ -1,48 +1,32 @@
-import {ModelTypes} from '../database';
-import Logger from './logger';
+import {CategoryOperations} from '../database';
+import {OnlyInformationFromBillType} from '../types';
 
-export default function GroupByCategories(filtered: ModelTypes.BillTypes[]) {
-  const copyFiltered = [...filtered];
-  const seenType: string[] = [];
-  const finalGroupedCategories: ModelTypes.BillTypes[] = [];
-  for (let i = 0; i < copyFiltered.length; i++) {
-    if (seenType.includes(copyFiltered[i].billCategory!)) {
-      const find = finalGroupedCategories.find(data => {
-        return data.billCategory === copyFiltered[i].billCategory;
-      });
-
-      copyFiltered[i].billAmount =
-        copyFiltered[i].billAmount! + find?.billAmount!;
-      if (find) {
-        var index = finalGroupedCategories.indexOf(find);
-        finalGroupedCategories.splice(index, 1);
-      }
-    } else {
-      seenType.push(copyFiltered[i].billCategory!);
-    }
-
-    finalGroupedCategories.push(copyFiltered[i]);
-  }
-  Group(filtered);
-  finalGroupedCategories.map(bill => {
-    Logger.consoleLog(`v1 - ${JSON.stringify(bill)}`, 'log');
-  });
-  // Logger.consoleLog(`v1 - ${finalGroupedCategories.map(item => )}`, 'log');
-  return finalGroupedCategories;
-}
-
-function Group(bills: ModelTypes.BillTypes[]) {
-  const dict: {[key: string]: number} = {};
-
+export default function GroupByCategories(
+  bills: OnlyInformationFromBillType[],
+) {
+  const categoryDictionary = CategoryOperations.getDictionary();
+  const dict: {[key: string]: [number, string]} = {};
   for (let bill of bills) {
-    if (bill.billCategory) {
-      if (dict.hasOwnProperty(bill.billCategory!)) {
-        dict[bill.billCategory] += bill.billAmount!;
+    const categoryDetail = categoryDictionary[bill.categoryId];
+    if (categoryDetail) {
+      if (dict.hasOwnProperty(categoryDetail[0])) {
+        dict[categoryDetail[0]][0] += bill.billAmount!;
       } else {
-        dict[bill.billCategory] = bill.billAmount!;
+        dict[categoryDetail[0]] = [bill.billAmount!, categoryDetail[1]!];
       }
     }
   }
-  // Logger.consoleLog(Array.from(dict), 'log');
-  Logger.consoleLog(dict, 'log');
+  let groupedCategories: {
+    billCategory: string;
+    billAmount: number;
+    categoryColor: string;
+  }[] = [];
+  Object.entries(dict).map(([key, value]) => {
+    groupedCategories.push({
+      billCategory: key,
+      billAmount: value[0],
+      categoryColor: value[1],
+    });
+  });
+  return groupedCategories;
 }

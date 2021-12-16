@@ -12,7 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage; // ⬅️ This!
 import com.facebook.react.bridge.JSIModulePackage; // ⬅️ This
-
+import com.rnfs.RNFSPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -28,7 +28,7 @@ public class MainApplication extends Application implements ReactApplication {
           @SuppressWarnings("UnnecessaryLocalVariable")
           List<ReactPackage> packages = new PackageList(this).getPackages();
           // Packages that cannot be autolinked yet can be added manually here, for example:
-          // packages.add(new MyReactNativePackage());
+           packages.add(new CustomNativeModuleManager());
           // packages.add(new WatermelonDBPackage() ); 
           return packages;
         }

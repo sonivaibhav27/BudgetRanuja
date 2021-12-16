@@ -6,17 +6,19 @@ import {
   Text,
   I18nManager,
   Pressable,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
 
-import MonthPicker, {
-  ACTION_DATE_SET,
-  ACTION_DISMISSED,
-  ACTION_NEUTRAL,
-} from 'react-native-month-year-picker';
+import MonthPicker, {ACTION_DATE_SET} from 'react-native-month-year-picker';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {useRecoilCallback, useSetRecoilState} from 'recoil';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {AuditSection, ActionButtons, DataSection} from './components';
-import {Icons} from '../../utils';
+import {buildCSV, DayJs, Icons, Toast} from '../../utils';
+import {BillOperations, BudgetOperations} from '../../database';
+import {BillsAtom, BudgetAtom, DetailState} from '../../State/Atoms';
+import {ActivityLoader} from '../../common';
 
 type Props = {
   navigation: StackNavigationProp<MainStackScreenType, 'Detail'>;
@@ -39,47 +41,88 @@ const monthNames = [
 const formateDateToGetMonthAndYear = (date: Date) => {
   return `${monthNames[date.getMonth()]}, ${date.getFullYear()}`;
 };
-export default (props: Props) => {
+export default (_: Props) => {
   const {height} = useWindowDimensions();
-  const [month, setMonth] = React.useState(new Date());
+  const [generatingCsv, setGeneratingCsv] = React.useState(false);
+  const [dateToShowBillsFor, setDateToShowBillsFor] = React.useState(
+    new Date(),
+  );
   const [monthPickerVisible, setMonthPickerVisible] = React.useState(false);
-  // BillOperations.createBill('card', 200000, 'Hello', new Date(), 'income');
-  // BillOperations.getBills();
-  React.useEffect(() => {
-    props.navigation.setOptions({
-      headerRight: () => {
-        return (
-          <View style={styles.saveToDriveContainer}>
-            <Icons.Entypo name="google-drive" color="#000" size={25} />
-            <Text style={styles.saveToDriveText}>Save to drive</Text>
-          </View>
-        );
-      },
-    });
-  }, [props.navigation]);
-
   const toggleMonthPicker = () => {
     setMonthPickerVisible(!monthPickerVisible);
   };
 
-  const callMonthPickerFunction = (event: string, newDate: Date) => {
-    console.log(event);
+  const setDetailAllBills = useSetRecoilState(DetailState.DetailAllBills);
+  const setDetailBudget = useSetRecoilState(BudgetAtom.DetailBudgetAtom);
+  const init = useRecoilCallback(
+    ({snapshot}) =>
+      () => {
+        const detailBills = snapshot.getLoadable(
+          BillsAtom.CurrentMonthAllBills,
+        ).contents;
+        const detailBudget = snapshot.getLoadable(
+          BudgetAtom.currentMonthBudget,
+        ).contents;
+        setDetailBudget(detailBudget);
+        setDetailAllBills(detailBills);
+      },
+    [],
+  );
+
+  const onGenerateReportButtonPressed = async () => {
+    setGeneratingCsv(true);
+    try {
+      const yearAndMonth = DayJs.getYearAndMonthFromDate(dateToShowBillsFor);
+      const billForCsv = await BillOperations.getBillsByDateInDetailForCSV(
+        yearAndMonth,
+      );
+      if (billForCsv) {
+        await buildCSV(billForCsv);
+      }
+      Alert.alert('CSV File Successfully saved .');
+    } catch (err) {
+      Toast('Failed to perform operation ' + err.message, 'LONG');
+    } finally {
+      setGeneratingCsv(false);
+    }
+  };
+
+  React.useEffect(() => {
+    _.navigation.setOptions({
+      headerRight: () => {
+        return (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={onGenerateReportButtonPressed}
+            style={styles.exportToCSVContainer}>
+            <Text style={styles.exportToCSVText}> &#x25a6; Export as csv</Text>
+          </TouchableOpacity>
+        );
+      },
+    });
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(() => {
+    init();
+  }, [init]);
+  const callMonthPickerFunction = async (event: string, newDate: Date) => {
+    console.log({newDate});
     switch (event) {
       case ACTION_DATE_SET:
         toggleMonthPicker();
-        setMonth(newDate);
-        // onSuccess(newDate);
-        break;
-      case ACTION_NEUTRAL:
-        // onNeutral(newDate);
-        toggleMonthPicker();
-        break;
-      case ACTION_DISMISSED:
-        toggleMonthPicker();
+        setDateToShowBillsFor(newDate);
+        const yearAndMonth = DayJs.getYearAndMonthFromDate(newDate);
+        console.log({yearAndMonth});
+        const bills = await BillOperations.getCurrentMonthBills(yearAndMonth);
+        const budget = await BudgetOperations.getCurrentMonthBudget(
+          yearAndMonth,
+        );
+        setDetailAllBills(bills != null ? bills : []);
+        setDetailBudget(budget || -1);
         break;
       default:
         toggleMonthPicker();
-      // onCancel()x; //when ACTION_DISMISSED new date will be undefined
     }
   };
 
@@ -89,15 +132,21 @@ export default (props: Props) => {
         style={styles.currentMonthContainer}
         onPress={toggleMonthPicker}>
         <Text style={styles.currentMonthText}>
-          {formateDateToGetMonthAndYear(month)}
+          {formateDateToGetMonthAndYear(dateToShowBillsFor)}
         </Text>
-        <Icons.Fontisto size={20} name="date" color="#000" />
+        <View style={styles.dateIconContainer}>
+          <Icons.Fontisto size={20} name="date" color={'#000'} />
+        </View>
       </Pressable>
       <View>
         <ActionButtons />
       </View>
       <View style={styles.dataContainer}>
-        <DataSection />
+        <DataSection
+          monthAndYearOfBillToShow={DayJs.getYearAndMonthFromDate(
+            dateToShowBillsFor,
+          )}
+        />
       </View>
       <View style={{height: height * 0.12}}>
         <AuditSection />
@@ -107,8 +156,13 @@ export default (props: Props) => {
         <MonthPicker
           locale="en"
           onChange={callMonthPickerFunction}
-          value={month}
+          value={dateToShowBillsFor}
         />
+      )}
+      {generatingCsv && (
+        <View style={styles.overlayCenter}>
+          <ActivityLoader loadingText="Generating Csv..." />
+        </View>
       )}
     </View>
   );
@@ -133,11 +187,41 @@ const styles = StyleSheet.create({
   currentMonthContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    // borderWidth: 1,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    marginTop: 5,
+    // borderColor: '#ddd',
+    marginHorizontal: 10,
+    backgroundColor: 'rgba(163,94,0,0.07)',
   },
   currentMonthText: {
-    fontSize: 20,
+    fontSize: 17,
     padding: 8,
     color: '#000',
     fontWeight: '700',
+  },
+  exportToCSVContainer: {
+    marginRight: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#008000',
+    padding: 8,
+    borderRadius: 100,
+  },
+  exportToCSVText: {
+    color: '#fff',
+  },
+  overlayCenter: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.1)',
+  },
+  dateIconContainer: {
+    // padding: 9,
+    // backgroundColor: 'rgba(89,93,229,0.1)',
+    // borderRadius: 100,
   },
 });

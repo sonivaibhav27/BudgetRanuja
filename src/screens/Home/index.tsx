@@ -9,6 +9,7 @@ import {
   PieChart,
   ActionButtons,
   DetailButton,
+  BudgetExceeded,
 } from './component';
 
 interface Props {
@@ -29,21 +30,27 @@ export default ({navigation}: Props) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Header />
+      <View style={{height: height * 0.2}}>
+        <View style={styles.header}>
+          <Header />
+        </View>
+        <View style={[styles.budgetSection]}>
+          <BudgetExceeded />
+          <BudgetSection toggleBottomSheet={toggleBottomSheet} />
+        </View>
       </View>
-      <View style={[styles.budgetSection, {height: height * 0.1}]}>
-        <BudgetSection toggleBottomSheet={toggleBottomSheet} />
-      </View>
-      <View style={styles.pieChart}>
+      <View style={[styles.pieChart, {height: height * 0.6}]}>
         <PieChart />
       </View>
-      <View style={[styles.actionButton]}>
-        <ActionButtons navigation={navigation} />
+      <View style={{height: height * 0.2, justifyContent: 'space-between'}}>
+        <View style={[styles.actionButton]}>
+          <ActionButtons navigation={navigation} />
+        </View>
+        <View>
+          <DetailButton onPress={navigateToDetailScreen} />
+        </View>
       </View>
-      <View>
-        <DetailButton onPress={navigateToDetailScreen} />
-      </View>
+
       {bottomSheetVisibile && (
         <BottomSheet closeBottomSheet={toggleBottomSheet} />
       )}
@@ -58,7 +65,7 @@ const styles = StyleSheet.create({
   },
   header: {
     // backgroundColor: 'red',
-    padding: 8,
+    paddingVertical: 4,
   },
   budgetSection: {
     marginBottom: 10,
@@ -66,10 +73,10 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flexDirection: 'row',
-    marginBottom: 10,
+    flex: 1,
+    marginBottom: 5,
   },
   pieChart: {
-    marginTop: 10,
-    flex: 1,
+    flex: 2.5,
   },
 });

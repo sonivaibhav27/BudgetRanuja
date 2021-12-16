@@ -1,28 +1,44 @@
 import {StackNavigationProp} from '@react-navigation/stack';
 import React from 'react';
 import {
-  Pressable,
   StyleSheet,
   Text,
   Platform,
   ScrollView,
   Linking,
   View,
-  Modal,
+  NativeModules,
 } from 'react-native';
-import {FullScreenModal} from '../../common';
+import {useSetRecoilState} from 'recoil';
+import {FullScreenModal, PressableButton} from '../../common';
 import {CurrencyCategories} from '../../data';
+import {CurrencyOperations} from '../../database';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
+import {UtilsAtom} from '../../State';
 import {ColorsTheme} from '../../theme&styles/theme';
 import {Icons, Logger, Toast} from '../../utils';
-import {IconButton, SettingSection} from './components';
+import {
+  IconButton,
+  SettingSection,
+  DeleteBills,
+  List,
+  CategoryList,
+} from './components';
 
-const openAnotherApp = (
+const {CustomNativeModule} = NativeModules;
+const openAnotherApp = async (
   appName: 'mail' | 'whatsapp' | 'browser',
   url: string,
 ) => {
   try {
-    Linking.openURL(url);
+    // const canOpenUrl = await Linking.canOpenURL(url);
+    // if (canOpenUrl) {
+    await Linking.openURL(url);
+    // } else {
+    // Toast(
+    //   appName.charAt(0).toUpperCase() + appName.slice(1) + ' App not found.',
+    // );
+    // }
   } catch (err) {
     Toast(err.code);
     Logger.consoleLog(err.description, 'log');
@@ -35,15 +51,22 @@ interface Props {
 
 export default ({navigation}: Props) => {
   const [openFullScreenModal, setOpenFullScreenModal] = React.useState(false);
+  const [appVersion, setAppVerion] = React.useState<string | null>(null);
+  const [selectModalText, setSelectModalText] = React.useState<
+    'Currency' | 'Categories' | 'Delete Bills' | null
+  >(null);
+
+  const setCurrency = useSetRecoilState(UtilsAtom.Currency);
+
   const sendMail = () => {
     openAnotherApp('mail', 'mailto:vidowndownload@gmail.com');
   };
 
-  // React.useEffect(() => {
-  //   navigation.setOptions({
-  //     headerShown: openFullScreenModal ? false : true,
-  //   });
-  // }, [openFullScreenModal, navigation]);
+  React.useEffect(() => {
+    CustomNativeModule.getAppVersion((version: string | null) => {
+      setAppVerion(version);
+    });
+  }, []);
 
   const shareViaWhatsapp = () => {
     try {
@@ -56,36 +79,57 @@ export default ({navigation}: Props) => {
     }
   };
 
-  const toggleFullScreenModal = () => {
+  const toggleFullScreenModal = (
+    typeOfScreen: 'Currency' | 'Categories' | 'Delete Bills',
+  ) => {
+    setSelectModalText(typeOfScreen);
     setOpenFullScreenModal(prev => !prev);
   };
 
   const openLicenses = () => {
     openAnotherApp('browser', 'https://ranuja-apps.github.io/');
   };
+  const onPremiumClick = () => {
+    navigation.navigate('Pricing', {
+      version: appVersion || '',
+    });
+  };
+
+  const onCurrencySelectCallback = async (name: string, symbol: string) => {
+    await CurrencyOperations.setCurrency(name, symbol);
+    // setOpenFullScreenModal(false);
+    setCurrency(symbol);
+  };
 
   return (
     <View style={styles.flex}>
-      <ScrollView style={styles.container}>
-        <Pressable style={styles.goPremiumContainer}>
-          <Icons.AntDesign name="diamond" color="#FFF" size={20} />
+      <ScrollView
+        contentContainerStyle={styles.contentContainerStyle}
+        style={styles.container}>
+        <PressableButton
+          onPress={onPremiumClick}
+          style={styles.goPremiumContainer}>
+          <Icons.FontAwesome name="diamond" color="#FFF" size={20} />
           <Text style={styles.goPremiumText}>Go Premium</Text>
-        </Pressable>
+        </PressableButton>
+
         <SettingSection title="App settings">
           <>
             <IconButton
-              onPress={toggleFullScreenModal}
+              onPress={() => toggleFullScreenModal('Currency')}
               iconFamily="Fontisco"
               iconName="dollar"
               text="Currency"
               showChevronRightIcon
             />
             <IconButton
+              onPress={() => toggleFullScreenModal('Categories')}
               iconName="circle-with-plus"
               text="bill categories"
               showChevronRightIcon
             />
             <IconButton
+              onPress={() => toggleFullScreenModal('Delete Bills')}
               iconName="delete"
               text="Delete prev bills to free space"
               showChevronRightIcon
@@ -117,16 +161,29 @@ export default ({navigation}: Props) => {
             />
           </>
         </SettingSection>
-        {/* <SettingSection title="Other settings" /> */}
+        {appVersion != null && (
+          <Text style={styles.appVersionText}>version v{appVersion}</Text>
+        )}
       </ScrollView>
 
       {openFullScreenModal && (
         <FullScreenModal
-          data={CurrencyCategories}
-          title="Currency"
+          title={selectModalText || ''}
           closeModal={toggleFullScreenModal}
-          navigation={navigation}
-        />
+          navigation={navigation}>
+          {selectModalText && selectModalText === 'Delete Bills' ? (
+            <DeleteBills />
+          ) : selectModalText === 'Categories' ? (
+            <CategoryList navigation={navigation} />
+          ) : (
+            <List
+              closeModal={() => setOpenFullScreenModal(false)}
+              onItemSelect={onCurrencySelectCallback}
+              navigation={navigation}
+              data={CurrencyCategories}
+            />
+          )}
+        </FullScreenModal>
       )}
     </View>
   );
@@ -135,12 +192,14 @@ export default ({navigation}: Props) => {
 const styles = StyleSheet.create({
   flex: {flex: 1},
   container: {
+    flex: 1,
+  },
+  contentContainerStyle: {
     padding: 20,
-    // marginBottom: 10,
   },
   goPremiumContainer: {
     backgroundColor: ColorsTheme.primary,
-    padding: 20,
+    padding: 15,
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
@@ -160,5 +219,12 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 18,
     marginLeft: 10,
+  },
+  appVersionText: {
+    color: '#666',
+    fontSize: 16,
+    textAlign: 'center',
+    fontWeight: '400',
+    letterSpacing: 1.1,
   },
 });

@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  BackHandler,
-  KeyboardAvoidingView,
-  Pressable,
-  TouchableOpacity,
-} from 'react-native';
+import {TouchableOpacity} from 'react-native';
 import {
   StyleSheet,
   Animated,
@@ -12,13 +7,15 @@ import {
   Easing,
   View,
   Text,
+  BackHandler,
 } from 'react-native';
-import {useSetRecoilState} from 'recoil';
+import {useRecoilState} from 'recoil';
 import {BudgetOperations} from '../database';
 import {BudgetAtom} from '../State/Atoms';
 import {GlobalStyle, Theme} from '../theme&styles';
-import Dayjs from '../utils/dayjs';
+import {DayJs, Toast} from '../utils';
 import Input from './Input';
+import PressableButton from './PressableButton';
 
 const {height} = Dimensions.get('window');
 
@@ -44,11 +41,17 @@ interface Props {
 const AnimatedPressable = Animated.createAnimatedComponent(TouchableOpacity);
 
 const CurrentMonth =
-  Months[+Dayjs.getCurrentMonthAndYear().toString().slice(0, 2) - 1];
+  Months[+DayJs.getCurrentYearAndMonth().toString().slice(4)];
+
+console.log({
+  CurrentMonth: DayJs.getCurrentYearAndMonth(),
+});
 export default (props: Props) => {
-  const [budget, setBudget] = React.useState('');
-  const setCurrentMonthBudgetInAtom = useSetRecoilState(
+  const [currentMonthBudgetAtom, setCurrentMonthBudgetInAtom] = useRecoilState(
     BudgetAtom.currentMonthBudget,
+  );
+  const [budget, setBudget] = React.useState(
+    currentMonthBudgetAtom !== -1 ? `${currentMonthBudgetAtom}` : '',
   );
   const animRef = React.useRef(new Animated.Value(0)).current;
   React.useEffect(() => {
@@ -79,29 +82,30 @@ export default (props: Props) => {
     return () => {
       handler.remove();
     };
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSetBudgetPress = async () => {
-    alert('re');
-    return;
     if (budget.length === 0) {
       return;
     }
-    if (budget.indexOf('.') !== -1) {
-      return;
-    }
     if (/^\d+$/.test(budget)) {
-      await BudgetOperations.upsertBudget(
-        +budget,
-        +Dayjs.getCurrentMonthAndYear(),
-      );
+      await BudgetOperations.upsertBudget(+budget);
       setCurrentMonthBudgetInAtom(+budget);
+      Animated.timing(animRef, {
+        toValue: 0,
+        duration: 250,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }).start(() => props.closeBottomSheet());
+    } else {
+      Toast('Only number is allowed.');
     }
   };
 
   return (
     <AnimatedPressable
-      activeOpacity={0.9}
+      activeOpacity={1}
       onPress={props.closeBottomSheet}
       style={[
         StyleSheet.absoluteFillObject,
@@ -115,10 +119,6 @@ export default (props: Props) => {
         styles.container,
       ]}>
       <Animated.View
-        onStartShouldSetResponder={event => true}
-        onTouchEnd={e => {
-          e.stopPropagation();
-        }}
         style={[
           styles.innerContainer,
           {transform: [{translateY: animatedStyle}]},
@@ -126,15 +126,16 @@ export default (props: Props) => {
         <View style={styles.contentContainer}>
           <Text style={styles.titleText}>Your {CurrentMonth} Budget</Text>
           <Input
+            placeholder={'Enter your budget'}
             value={budget}
             onChangeText={newBudget => setBudget(newBudget)}
             style={styles.textInput}
           />
-          <TouchableOpacity
+          <PressableButton
             onPress={onSetBudgetPress}
             style={styles.buttonContainer}>
             <Text style={styles.buttonText}>Set</Text>
-          </TouchableOpacity>
+          </PressableButton>
         </View>
       </Animated.View>
     </AnimatedPressable>
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.2)',
   },
   innerContainer: {
-    height: height / 2,
+    height: height / 2.3,
     backgroundColor: 'white',
     borderTopStartRadius: 10,
     borderTopEndRadius: 10,
@@ -163,12 +164,13 @@ const styles = StyleSheet.create({
   },
   titleText: {
     ...GlobalStyle.GlobalCommonStyles.textStyle,
-    fontSize: 30,
+    fontSize: 18,
     textAlign: 'center',
     marginHorizontal: 30,
+    fontFamily: GlobalStyle.Font.SemiBold,
   },
   textInput: {
-    borderWidth: 1,
+    borderBottomWidth: 1,
     padding: 10,
     borderRadius: 8,
     borderColor: '#444',
@@ -176,15 +178,19 @@ const styles = StyleSheet.create({
     color: '#000',
     fontFamily: 'OpenSans-SemiBold',
     fontSize: 20,
+    width: 200,
+    alignSelf: 'center',
   },
   buttonContainer: {
     backgroundColor: Theme.ColorsTheme.primary,
-    padding: 10,
+    padding: 8,
     marginTop: 10,
     marginHorizontal: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
+    borderRadius: 8,
+    width: 200,
+    alignSelf: 'center',
   },
   buttonText: {
     color: '#fff',

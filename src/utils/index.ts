@@ -5,3 +5,4 @@ export {Icons};
 export {default as buildCSV} from './buildCSV';
 export {default as Toast} from './Toast';
 export {default as GroupByCategories} from './GroupbyCategories';
+export * as Miscellaneous from './Misc';

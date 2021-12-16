@@ -1,75 +1,57 @@
 import {StackScreenProps} from '@react-navigation/stack';
 import React from 'react';
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {useRecoilCallback} from 'recoil';
+import {
+  PermissionsAndroid,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {ActivityLoader, PressableButton} from '../../common';
 import {BillOperations} from '../../database';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
-import {DataAtom} from '../../State/Atoms/Detail';
-import {GlobalStyle} from '../../theme&styles';
-import {TotalSection} from './components';
+import {Theme} from '../../theme&styles';
+import {ExtraDetailTypes, TCSVBills} from '../../types';
+import {buildCSV, Miscellaneous, Toast} from '../../utils';
+import {ListOfBills, TotalSection} from './components';
 
 type Props = StackScreenProps<MainStackScreenType, 'DetailAboutOneCategory'>;
 
-type FlatlistItemProp = {
-  item: {billDate: Date; billAmount: string};
-  index: number;
-};
-type DataProp = {billDate: Date; billAmount: string}[];
-
-type RenderFlatlistWithDataProps = {
-  data: DataProp | null;
-};
-
-const RenderFlatlistWithData = ({data}: RenderFlatlistWithDataProps) => {
-  // React.useEffect(() => {
-  //   const data = GetDataFromRecoil();
-  //   console.log({data});
-  // }, []);
-
-  // const GetDataFromRecoil = useRecoilCallback(({snapshot}) => () => {
-  //   return snapshot.getLoadable(DataAtom).contents;
-  // });
-
-  const renderItem = ({item, index}: FlatlistItemProp) => {
-    return (
-      <View style={styles.rowContainer}>
-        <View style={styles.dateAndNumberContainer}>
-          <Text style={[styles.commonTextStyle, styles.numberTextStyle]}>
-            {index + 1}.{' '}
-          </Text>
-          <Text style={[styles.commonTextStyle, styles.dateTextStyle]}>
-            {item.billDate}
-          </Text>
-        </View>
-        <Text style={[styles.commonTextStyle, styles.amountTextStyle]}>
-          ${item.billAmount}
-        </Text>
-      </View>
-    );
-  };
-  return (
-    <FlatList
-      style={styles.flex}
-      ListHeaderComponent={
-        <View style={[styles.rowContainer, styles.headerRowContainer]}>
-          <Text style={styles.commonHeaderTextStyle}>Date</Text>
-          <Text style={styles.commonHeaderTextStyle}>Amount</Text>
-        </View>
-      }
-      data={data}
-      renderItem={renderItem}
-    />
-  );
-};
-
 export default (props: Props) => {
-  const [categoryData, setCategoryData] = React.useState(null);
-  const onGenerateReportButtonPressed = () => {};
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+  const [categoryData, setCategoryData] = React.useState<
+    ExtraDetailTypes.DataProp[]
+  >([]);
+  const [totalAmount, setTotalAmount] = React.useState(0);
+
+  const checkPermission = async () => {
+    const permission = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+    );
+    console.log({permission});
+    if (!permission) {
+      const response = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      );
+      if (response === 'granted') {
+        return true;
+      } else if (response === 'denied') {
+        Toast('Need Permission to download file.');
+        return false;
+      } else {
+        return false;
+      }
+    }
+    return true;
+  };
+
   React.useEffect(() => {
     props.navigation.setOptions({
       headerRight: () => {
         return (
           <TouchableOpacity
+            activeOpacity={0.8}
             onPress={onGenerateReportButtonPressed}
             style={styles.exportToCSVContainer}>
             <Text style={styles.exportToCSVText}> &#x25a6; Export as csv</Text>
@@ -77,66 +59,115 @@ export default (props: Props) => {
         );
       },
     });
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoryData, props.navigation]);
+  React.useEffect(() => {
     getAllDataForOneCategory();
+
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getAllDataForOneCategory = async () => {
-    const data = await BillOperations.getBillsByCategories(
-      props.route.params.categoryName,
-    );
-    setCategoryData(data);
+  const onGenerateReportButtonPressed = async () => {
+    if (categoryData.length > 0) {
+      const granted = await checkPermission();
+      const csv: TCSVBills[] = categoryData.map(item => {
+        return {
+          ...item,
+          categoryName: props.route.params.categoryName,
+          billType: props.route.params.categoryName as 'expense' | 'income',
+        };
+      });
+      if (granted) {
+        await buildCSV(csv);
+      }
+    }
   };
-  if (categoryData === null) {
+  const getAllDataForOneCategory = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // throw new Error('new');
+      const categoryId = Miscellaneous.findKeyByValue(
+        props.route.params.categoryName,
+      );
+      if (typeof categoryId === 'undefined') {
+        Toast('Something went wrong, please reload the app.');
+        return;
+      }
+      const data = (await BillOperations.getBillsByCategoriesAndMonth(
+        categoryId,
+        props.route.params.monthAndYearOfBillToShow,
+      )) as ExtraDetailTypes.DataProp[];
+      setCategoryData(data);
+
+      const total = data?.reduce((prev, curr) => prev + curr.billAmount!, 0);
+      setTotalAmount(typeof total !== 'undefined' ? total : 0);
+    } catch (err) {
+      Toast('Error while fetching record ,Please try again.');
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  if (loading) {
     return (
-      <View>
-        <Text>Loading...</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityLoader />
       </View>
     );
   }
   return (
     <View style={styles.flex}>
-      <RenderFlatlistWithData data={categoryData} />
-      <TotalSection amount={20000} />
+      {error === null ? (
+        <>
+          <ListOfBills
+            currency={props.route.params.currency}
+            navigation={props.navigation}
+            data={categoryData}
+          />
+          <TotalSection amount={totalAmount} />
+        </>
+      ) : (
+        <View style={styles.errorContainer}>
+          <Text style={styles.textCommon}>
+            Something went failed while fetching record
+          </Text>
+          <Text style={styles.textCommon}>
+            Error: {error!['message'] || 'Unknown Error'}
+          </Text>
+          <PressableButton onPress={getAllDataForOneCategory}>
+            <Text style={styles.tryAgainText}>Try Again.</Text>
+          </PressableButton>
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  errorContainer: {flex: 1, justifyContent: 'center', alignItems: 'center'},
+  textCommon: {
+    color: '#000',
+    fontSize: 16,
+  },
+  tryAgainText: {
+    color: Theme.ColorsTheme.primary,
+    fontSize: 18,
+    fontWeight: '500',
+  },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+
   flex: {flex: 1},
   container: {
     padding: 10,
     marginHorizontal: 20,
     flex: 1,
   },
-  rowContainer: {
-    flexDirection: 'row',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEE',
-    justifyContent: 'space-between',
-    // flex: 1,
-  },
-  dateAndNumberContainer: {
-    flexDirection: 'row',
-  },
-  commonTextStyle: {
-    color: '#000',
-    fontSize: 18,
-    fontFamily: GlobalStyle.Font.SemiBold,
-  },
-  numberTextStyle: {},
-  amountTextStyle: {},
-  dateTextStyle: {},
-  commonHeaderTextStyle: {
-    color: '#000',
-    fontSize: 20,
-    // fontWeight: 'bold',
-    textAlign: 'center',
-    fontFamily: GlobalStyle.Font.Bold,
-  },
-  headerRowContainer: {
-    borderBottomWidth: 0,
-  },
+
   exportToCSVContainer: {
     marginRight: 20,
     flexDirection: 'row',

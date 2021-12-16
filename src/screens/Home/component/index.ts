@@ -4,3 +4,4 @@ export {default as PieChart} from './PieChart';
 export {default as Button} from './Button';
 export {default as DetailButton} from './DetailButton';
 export {default as ActionButtons} from './ActionButtons';
+export {default as BudgetExceeded} from './BudgetExceeded';

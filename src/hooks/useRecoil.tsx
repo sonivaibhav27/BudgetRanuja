@@ -1,24 +1,22 @@
-import Database from '@nozbe/watermelondb/Database';
 import React from 'react';
-import {StatusBar} from 'react-native';
+import {StatusBar, StyleSheet} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {RecoilRoot} from 'recoil';
 type Props = any;
-
-type props = {
-  database: Database;
-};
-
 export default (RootComponent: Props) => {
-  const RootRecoil = props => {
+  const RootRecoil = () => {
     return (
-      <SafeAreaView style={{flex: 1}}>
+      <SafeAreaView style={styles.flex}>
         <RecoilRoot>
           <StatusBar backgroundColor="#f1f1f1" barStyle="dark-content" />
-          <RootComponent database={props.database} />
+          <RootComponent />
         </RecoilRoot>
       </SafeAreaView>
     );
   };
   return RootRecoil;
 };
+
+const styles = StyleSheet.create({
+  flex: {flex: 1},
+});

@@ -2,7 +2,7 @@ import {appSchema, tableSchema} from '@nozbe/watermelondb';
 import {DatabaseConfig} from '../../../config';
 
 export default appSchema({
-  version: DatabaseConfig.dbVersion,
+  version: 2,
   tables: [
     // We'll add tableSchemas here later
     tableSchema({
@@ -13,7 +13,7 @@ export default appSchema({
           type: 'number',
         },
         {
-          name: 'Date',
+          name: 'Date_at',
           type: 'number',
         },
         {
@@ -26,7 +26,11 @@ export default appSchema({
           type: 'number',
         },
         {
-          name: 'Category',
+          name: 'DateAsYearAndMonth',
+          type: 'number',
+        },
+        {
+          name: 'Category_Id',
           type: 'string',
         },
       ],
@@ -35,11 +39,37 @@ export default appSchema({
       name: DatabaseConfig.tables.Budget,
       columns: [
         {
-          name: 'DateAsMonthAndYear',
+          name: 'DateAsYearAndMonth',
           type: 'number',
         },
         {
           name: 'BudgetAmount',
+          type: 'number',
+        },
+      ],
+    }),
+    tableSchema({
+      name: DatabaseConfig.tables.Categories,
+      columns: [
+        {
+          name: 'Category_Id',
+          type: 'string',
+          isOptional: false,
+        },
+        {
+          name: 'Category_Name',
+          type: 'string',
+        },
+        {
+          name: 'IsDeleted',
+          type: 'number',
+        },
+        {
+          name: 'ColorCode',
+          type: 'string',
+        },
+        {
+          name: 'Category_Type',
           type: 'number',
         },
       ],

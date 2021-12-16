@@ -4,8 +4,7 @@ import {useRecoilValue} from 'recoil';
 import {PressableButton} from '../../../common';
 import {UtilsAtom} from '../../../State';
 import {BudgetAtom} from '../../../State/Atoms';
-import {Theme} from '../../../theme&styles';
-import {Icons} from '../../../utils';
+import {Icons, Miscellaneous} from '../../../utils';
 
 type Props = {
   text: string;
@@ -31,7 +30,11 @@ const Section = ({
     <>
       <PressableButton
         onPress={typeof onPress === 'function' ? onPress : () => {}}
-        style={[{backgroundColor: background}, styles.sectionContainer, style]}>
+        style={[
+          {backgroundColor: background},
+          styles.sectionContainer,
+          style!,
+        ]}>
         <Text style={[styles.commonTextStyle, textStyle]}>{text}</Text>
         <View style={styles.itemContainer}>
           <Text style={[styles.commonTextStyle, textStyle]}>{amount}</Text>
@@ -54,7 +57,15 @@ export default (props: BudgetSectionProps) => {
         onPress={props.toggleBottomSheet}
         text="budget"
         background={currentTheme.backgroundBanner}
-        amount={currentBudgetAmount === -1 ? 'Not set' : currentBudgetAmount}>
+        // eslint-disable-next-line react-native/no-inline-styles
+        textStyle={{
+          color: '#000',
+        }}
+        amount={
+          currentBudgetAmount === -1
+            ? 'Not set'
+            : Miscellaneous.formatIntoCurrency(currentBudgetAmount)
+        }>
         <View style={styles.iconContainer}>
           <Icons.AntDesign name="edit" color="#000" size={16} />
         </View>
@@ -77,19 +88,22 @@ const styles = StyleSheet.create({
   },
   sectionContainer: {
     marginHorizontal: 20,
-    padding: 10,
+    padding: 8,
     marginTop: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderRadius: 7,
-    flex: 0.5,
+    flex: 0.8,
+    borderWidth: 1,
+    borderColor: '#e6e6e6',
     // height: 50,
   },
   commonTextStyle: {
     color: '#000',
-    fontWeight: 'bold',
+    fontWeight: '500',
     textTransform: 'capitalize',
+    fontSize: 18,
   },
   iconContainer: {
     borderRadius: 100,
@@ -100,5 +114,8 @@ const styles = StyleSheet.create({
   itemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    // flex: 1,
+    // backgroundColor: 'red',
   },
+  // label: {flex: 0.4},
 });

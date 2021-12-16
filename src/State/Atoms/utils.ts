@@ -4,3 +4,8 @@ export const ThemeAtom = atom({
   key: 'theme',
   default: Theme.ColorsTheme,
 });
+
+export const Currency = atom({
+  key: 'currencyAtom',
+  default: '$',
+});

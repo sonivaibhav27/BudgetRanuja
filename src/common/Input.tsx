@@ -9,6 +9,7 @@ interface Props {
   onSubmitEditing?: () => void;
   autoFocus?: boolean;
   style: ViewStyle & TextStyle;
+  placeholder?: string;
 }
 
 const Input = React.forwardRef<TextInput, Props>((props, ref) => {
@@ -21,9 +22,10 @@ const Input = React.forwardRef<TextInput, Props>((props, ref) => {
       maxLength={props.maxLength}
       ref={ref}
       returnKeyType={'next'}
-      // enablesReturnKeyAutomatically
       onSubmitEditing={props.onSubmitEditing}
       autoFocus={props.autoFocus}
+      placeholder={props.placeholder}
+      placeholderTextColor="#999"
     />
   );
 });

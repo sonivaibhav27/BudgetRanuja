@@ -2,28 +2,53 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import React from 'react';
 import {FlatList, StyleSheet, Text, View} from 'react-native';
-import {useRecoilValue} from 'recoil';
+import {
+  useRecoilRefresher_UNSTABLE,
+  useRecoilValue,
+  useSetRecoilState,
+} from 'recoil';
 import {MainStackScreenType} from '../../../navigations/MainStack/types';
-import {DetailState} from '../../../State/Atoms';
-import {Logger} from '../../../utils';
+import {DetailState, UtilsAtom} from '../../../State/Atoms';
 import Card from './Card';
+import EmptyScreen from './Empty';
 
-export default () => {
-  const Data = useRecoilValue(DetailState.dataForDetail);
-  Logger.consoleLog(Data, 'log');
+type Props = {
+  monthAndYearOfBillToShow: number;
+};
+
+export default (props: Props) => {
+  const setSelectedType = useSetRecoilState(DetailState.selectedType);
+  const bills = useRecoilValue(DetailState.DetailDataBasedOnSelectedType);
+  const currency = useRecoilValue(UtilsAtom.Currency);
+  useRecoilRefresher_UNSTABLE(DetailState.DetailDataBasedOnSelectedType);
+  React.useEffect(() => {
+    setSelectedType('expense');
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const navigation =
     useNavigation<StackNavigationProp<MainStackScreenType, 'Detail'>>();
   return (
     <FlatList
-      data={Data}
+      contentContainerStyle={{flex: 1}}
+      data={bills[1].length === 0 ? [] : bills[0]}
       keyExtractor={(_, index) => index.toString()}
       renderItem={({item}) => {
-        return <Card navigation={navigation} {...item} />;
+        return (
+          <Card
+            currency={currency}
+            monthAndYearOfBillToShow={props.monthAndYearOfBillToShow}
+            navigation={navigation}
+            {...item}
+            billType={bills[1] || 'expense'}
+          />
+        );
       }}
       ListEmptyComponent={
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Nothing to show :)</Text>
-        </View>
+        <EmptyScreen />
+        // <View style={styles.emptyContainer}>
+        //   <Text style={styles.emptyText}>Nothing to show :)</Text>
+        // </View>
       }
     />
   );

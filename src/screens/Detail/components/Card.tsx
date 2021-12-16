@@ -2,12 +2,16 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import React from 'react';
 import {StyleSheet, Text, View, Platform, Pressable} from 'react-native';
 import {MainStackScreenType} from '../../../navigations/MainStack/types';
+import {Miscellaneous} from '../../../utils';
 
 interface CardProps {
-  billCategory?: string;
+  typeOfBill?: string;
   billAmount?: number;
-  billDate?: Date;
+  billCategory?: string;
   navigation: StackNavigationProp<MainStackScreenType, 'Detail'>;
+  monthAndYearOfBillToShow: number;
+  billType?: 'income' | 'expense';
+  currency: string;
 }
 
 export default (props: CardProps) => {
@@ -15,35 +19,48 @@ export default (props: CardProps) => {
     if (props.billCategory?.length) {
       props.navigation.navigate('DetailAboutOneCategory', {
         categoryName: props.billCategory,
+        monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
+        billType: props.billType!,
+        currency: props.currency,
       });
     }
   };
   return (
-    <Pressable
-      onPress={navigateToDetailAboutOneCategory}
-      style={styles.container}>
-      <View>
-        <Text style={styles.categoryText}>{props.billCategory}</Text>
-      </View>
-      <Text style={styles.amount}>{props.billAmount}</Text>
-    </Pressable>
+    <View style={styles.outerContainer}>
+      <Pressable
+        onPress={navigateToDetailAboutOneCategory}
+        style={styles.container}>
+        <View style={styles.categoryContainer}>
+          <Text style={styles.categoryText}>{props.billCategory}</Text>
+        </View>
+        <Text style={styles.amount}>
+          {props.currency}
+          {Miscellaneous.formatIntoCurrency(props.billAmount!)}
+        </Text>
+      </Pressable>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    justifyContent: 'center',
+  },
   container: {
     padding: 10,
     // elevation: 1,
     backgroundColor: '#fff',
-    margin: 8,
+    marginHorizontal: 15,
+    marginTop: 6,
     borderRadius: 8,
+    marginBottom: 4,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
 
     ...Platform.select({
       android: {
-        elevation: 1,
+        elevation: 2,
       },
       ios: {
         shadowOffset: {width: 3, height: 3},
@@ -52,14 +69,20 @@ const styles = StyleSheet.create({
         shadowOpacity: 1,
       },
     }),
+    // borderWidth: 0.2,
+    // borderColor: '#666',
   },
   categoryText: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '400',
     color: '#222',
   },
   amount: {
     fontSize: 16,
     color: '#000',
+    fontWeight: '700',
+  },
+  categoryContainer: {
+    flex: 1,
   },
 });

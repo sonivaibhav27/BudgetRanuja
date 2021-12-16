@@ -1,15 +1,18 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
+import {useRecoilValue} from 'recoil';
+import {BudgetAtom, DetailState} from '../../../State/Atoms';
+import {Miscellaneous} from '../../../utils';
 
 interface AuditProps {
   text: string;
-  amount: number;
+  amount: string;
 }
 const Audit = ({text, amount}: AuditProps) => {
   return (
     <View style={styles.auditContainer}>
       <Text style={styles.auditHeaderText}>{text}</Text>
-      <Text style={styles.auditAmountText}>${amount}</Text>
+      <Text style={styles.auditAmountText}>{amount}</Text>
     </View>
   );
 };
@@ -19,13 +22,28 @@ const Separator = () => {
 };
 
 export default () => {
+  const auditAmount = useRecoilValue(DetailState.DetailAuditBanner);
+  const auditBudget = useRecoilValue(BudgetAtom.DetailBudgetAtom);
   return (
     <View style={styles.container}>
-      <Audit text="budget" amount={1000} />
+      <Audit
+        text="budget"
+        amount={
+          auditBudget === -1
+            ? 'Not Set'
+            : Miscellaneous.formatIntoCurrency(auditBudget)
+        }
+      />
       <Separator />
-      <Audit text="income" amount={2000} />
+      <Audit
+        text="income"
+        amount={Miscellaneous.formatIntoCurrency(auditAmount.incomeTotal)}
+      />
       <Separator />
-      <Audit text="expense" amount={2000} />
+      <Audit
+        text="expense"
+        amount={Miscellaneous.formatIntoCurrency(auditAmount.expenseTotal)}
+      />
     </View>
   );
 };
@@ -42,6 +60,7 @@ const styles = StyleSheet.create({
   auditContainer: {
     justifyContent: 'space-around',
     alignItems: 'center',
+    flex: 1,
   },
   auditHeaderText: {
     fontSize: 16,
@@ -52,7 +71,7 @@ const styles = StyleSheet.create({
   auditAmountText: {
     fontWeight: 'bold',
     color: '#A35E00',
-    fontSize: 18,
+    fontSize: 15,
   },
   separator: {
     borderLeftWidth: 2,

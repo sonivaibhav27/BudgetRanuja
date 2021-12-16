@@ -7,17 +7,21 @@ import {
   FlatList,
   Easing,
   Dimensions,
+  BackHandler,
 } from 'react-native';
+import {CategoryType} from '../database/Types';
 import PressableButton from './PressableButton';
 
 const height = Dimensions.get('window').height;
+
 type Props = {
-  data: any[];
-  onItemSelect: (item: any) => void;
+  data: CategoryType[];
+  onItemSelect: (item: CategoryType) => void;
   closeModal: () => void;
 };
 
 export default ({data, onItemSelect, closeModal}: Props) => {
+  console.log({data});
   const animRef = React.useRef(new Animated.Value(0)).current;
   React.useEffect(() => {
     Animated.timing(animRef, {
@@ -26,9 +30,18 @@ export default ({data, onItemSelect, closeModal}: Props) => {
       easing: Easing.linear,
       useNativeDriver: true,
     }).start();
-  }, [animRef]);
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        closeModal();
+        return true;
+      },
+    );
 
-  const _onItemSelect = (item: any) => {
+    return () => backHandler.remove();
+  }, [animRef, closeModal]);
+
+  const _onItemSelect = (item: CategoryType) => {
     Animated.timing(animRef, {
       toValue: 0,
       duration: 200,
@@ -39,13 +52,23 @@ export default ({data, onItemSelect, closeModal}: Props) => {
       closeModal();
     });
   };
-  const renderItem = ({item}: {item: any}) => {
+  const renderItem = ({item}: {item: CategoryType}) => {
     return (
       <View>
         <PressableButton
           onPress={() => _onItemSelect(item)}
           style={styles.itemContainer}>
-          <Text style={styles.text}>{item}</Text>
+          <Text style={styles.text}>{item.CategoryName}</Text>
+          {item.CategoryColorCode !== '' ? (
+            <View
+              style={[
+                styles.colorDot,
+                {backgroundColor: item.CategoryColorCode},
+              ]}
+            />
+          ) : (
+            <View />
+          )}
         </PressableButton>
       </View>
     );
@@ -76,7 +99,7 @@ export default ({data, onItemSelect, closeModal}: Props) => {
         ]}>
         <FlatList
           ItemSeparatorComponent={() => <View style={styles.separator} />}
-          keyExtractor={item => item}
+          keyExtractor={(item, index) => `${item}-${index}`}
           data={data}
           renderItem={renderItem}
         />
@@ -91,6 +114,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.1)',
     paddingHorizontal: 20,
+    paddingVertical: 20,
   },
   innerContainer: {
     backgroundColor: '#FFF',
@@ -99,6 +123,9 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   separator: {
     borderBottomWidth: 1,
@@ -106,8 +133,12 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#000',
-    fontWeight: '700',
-    textAlign: 'center',
-    fontSize: 20,
+    fontWeight: '500',
+    fontSize: 18,
+  },
+  colorDot: {
+    width: 13,
+    height: 13,
+    borderRadius: 10,
   },
 });

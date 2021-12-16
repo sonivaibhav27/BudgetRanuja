@@ -7,5 +7,5 @@ export default class Budget extends Model {
 
   @field('BudgetAmount') BudgetAmount!: number;
 
-  @field('DateAsMonthAndYear') DateAsMonthAndYearString!: number;
+  @field('DateAsYearAndMonth') DateAsYearAndMonth!: number;
 }
