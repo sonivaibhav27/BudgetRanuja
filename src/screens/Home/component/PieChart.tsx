@@ -7,6 +7,7 @@ import {BillsAtom} from '../../../State/Atoms';
 import {GroupByCategories, Icons} from '../../../utils';
 import {PressableButton} from '../../../common';
 import {MainStackScreenType} from '../../../navigations/MainStack/types';
+import Balance from './Balance';
 
 export default () => {
   const navigation =
@@ -39,30 +40,32 @@ export default () => {
     };
     return (
       <View style={styles.container}>
-        <VictoryPie
-          // disableInlineStyles
-          style={{
-            labels: {fill: '#fff', fontSize: 12, fontWeight: 'bold'},
-            parent: {
-              zIndex: -1,
-              padding: 0,
-              // backgroundColor: 'red',
-            },
-            data: {
-              fill: ({datum}) => datum.fill,
-            },
-          }}
-          radius={height * 0.18}
-          data={dataToShowInPieChart}
-          padAngle={0.5}
-          height={height * 0.4}
-          labelPlacement={({index}) => (index ? 'parallel' : 'perpendicular')}
-          containerComponent={<VictoryContainer responsive={true} />}
-          innerRadius={height * 0.08}
-          labelRadius={({innerRadius}) => 6 + +innerRadius!}
-        />
-
-        <View style={{}}>
+        <View style={{position: 'relative'}}>
+          <VictoryPie
+            // disableInlineStyles
+            style={{
+              labels: {fill: '#fff', fontSize: 10, fontWeight: 'bold'},
+              parent: {
+                zIndex: -1,
+                padding: 0,
+                // backgroundColor: 'red',
+              },
+              data: {
+                fill: ({datum}) => datum.fill,
+              },
+            }}
+            radius={height * 0.18}
+            data={dataToShowInPieChart}
+            padAngle={0.5}
+            height={height * 0.4}
+            labelPlacement={({index}) => (index ? 'parallel' : 'perpendicular')}
+            containerComponent={<VictoryContainer responsive={true} />}
+            innerRadius={height * 0.1}
+            labelRadius={({innerRadius}) => 6 + +innerRadius!}
+          />
+        </View>
+        <Balance sumOfExpenses={sumOfExpenses} />
+        <View style={{marginTop: 5}}>
           <PressableButton
             onPress={onGraphShowInDetailPress}
             style={styles.graphInDetailButtonContainer}>
@@ -96,6 +99,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     // backgroundColor: 'red',
     flex: 1,
+    // backgroundColor: 'red',
     // backgroundColor: 'red',
   },
   graphInDetailButtonContainer: {

@@ -10,8 +10,9 @@ import {
   PricingScreen,
   PieChartScreen,
   EditCategoryScreen,
+  SplashScreen,
 } from '../../screens';
-import {Text, View, useWindowDimensions} from 'react-native';
+import {useWindowDimensions} from 'react-native';
 import {useInitialDataOnAppLaunch} from '../../hooks';
 const Stack = createStackNavigator<MainStackScreenType>();
 
@@ -19,16 +20,12 @@ export default () => {
   const {width} = useWindowDimensions();
   const getDataLoadingState = useInitialDataOnAppLaunch();
   if (getDataLoadingState) {
-    return (
-      <View>
-        <Text>Loading...</Text>
-      </View>
-    );
+    return <SplashScreen />;
   }
 
   return (
     <Stack.Navigator
-      // initialRouteName="PieChart"
+      // initialRouteName="PieChart"j
       screenOptions={{
         headerTitleStyle: {
           left: -15,

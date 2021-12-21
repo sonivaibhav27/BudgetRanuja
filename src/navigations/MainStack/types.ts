@@ -23,5 +23,7 @@ export type MainStackScreenType = {
     categoryType?: 'income' | 'expense';
     allCategories?: TCategoryType[];
     comingFrom: 'Category' | 'Currency';
+    type?: 'New';
+    categoryColor?: string;
   };
 };

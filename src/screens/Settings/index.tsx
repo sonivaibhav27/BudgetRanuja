@@ -68,6 +68,13 @@ export default ({navigation}: Props) => {
     });
   }, []);
 
+  React.useEffect(() => {
+    const event = navigation.addListener('focus', () => {
+      setOpenFullScreenModal(false);
+    });
+    return () => event();
+  }, [navigation]);
+
   const shareViaWhatsapp = () => {
     try {
       openAnotherApp(

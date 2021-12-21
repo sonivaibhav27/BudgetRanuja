@@ -7,7 +7,6 @@ import {
   I18nManager,
   Pressable,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 
 import MonthPicker, {ACTION_DATE_SET} from 'react-native-month-year-picker';
@@ -79,7 +78,6 @@ export default (_: Props) => {
       if (billForCsv) {
         await buildCSV(billForCsv);
       }
-      Alert.alert('CSV File Successfully saved .');
     } catch (err) {
       Toast('Failed to perform operation ' + err.message, 'LONG');
     } finally {

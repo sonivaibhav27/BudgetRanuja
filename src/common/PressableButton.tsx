@@ -6,11 +6,13 @@ interface Props {
   onPress: () => void;
   style?: ViewStyle | ViewStyle[];
   disable?: boolean;
+  hitSlop?: any;
 }
 
 export default (props: Props) => {
   return (
     <Pressable
+      hitSlop={props.hitSlop}
       disabled={props.disable}
       android_ripple={{
         color: '#EEE',

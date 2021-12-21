@@ -17,7 +17,7 @@ export default () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.appNameText}>Budget</Text>
+      <Text style={styles.appNameText}>Budjet</Text>
       <Pressable
         onPress={navigateToSettingScreen}
         hitSlop={{left: 5, right: 5, top: 5, bottom: 5}}
@@ -43,5 +43,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     ...GlobalStyle.TextStyle.h1,
     color: '#000',
+    fontSize: 18,
   },
 });

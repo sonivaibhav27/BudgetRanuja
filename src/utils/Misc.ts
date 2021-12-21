@@ -35,6 +35,7 @@ export const ValidateBill = (bill: TBillDetail, billAmount: string) => {
     );
   }
   if (
+    typeof bill.categoryId === 'undefined' ||
     bill.categoryId!.length === 0 ||
     bill.billDate === null ||
     typeof bill.billDate === 'undefined' ||
@@ -43,13 +44,13 @@ export const ValidateBill = (bill: TBillDetail, billAmount: string) => {
   ) {
     throw new ApplicationError(
       'ApplicationError',
-      'Please fill all mandatory Detail',
+      'Please check Category and amount input.',
     );
   }
-  if (!/^[-]?\d+$/.test(billAmount)) {
+  if (!/^[-]?\d*(\.\d{0,2})?$/.test(billAmount)) {
     throw new ApplicationError(
       'ApplicationError',
-      'Amount should be of type number only',
+      'Amount should be of type number only and Only 2 Decimal are allowed.',
     );
   }
   if (Number(billAmount) < 0) {

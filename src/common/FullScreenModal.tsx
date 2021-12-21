@@ -76,7 +76,7 @@ export default (props: Props) => {
         <View style={styles.crossButtonContainer}>
           <PressableButton onPress={_closeModal}>
             <View>
-              <Icons.Entypo name="cross" size={25} color="#444" />
+              <Icons.Entypo name="cross" size={25} color="#222" />
             </View>
           </PressableButton>
         </View>
@@ -94,11 +94,10 @@ const styles = StyleSheet.create({
   crossButtonContainer: {
     padding: 6,
     borderRadius: 100,
-    backgroundColor: '#EFEFEF',
     alignSelf: 'flex-end',
     position: 'absolute',
     top: 10,
-    right: 10,
+    left: 10,
   },
   headerText: {
     ...GlobalStyle.TextStyle.header,

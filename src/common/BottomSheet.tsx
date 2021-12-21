@@ -1,5 +1,4 @@
 import React from 'react';
-import {TouchableOpacity} from 'react-native';
 import {
   StyleSheet,
   Animated,
@@ -8,6 +7,8 @@ import {
   View,
   Text,
   BackHandler,
+  Keyboard,
+  TouchableOpacity,
 } from 'react-native';
 import {useRecoilState} from 'recoil';
 import {BudgetOperations} from '../database';
@@ -97,7 +98,9 @@ export default (props: Props) => {
         duration: 250,
         easing: Easing.linear,
         useNativeDriver: true,
-      }).start(() => props.closeBottomSheet());
+      }).start(() => {
+        Keyboard.dismiss();
+      });
     } else {
       Toast('Only number is allowed.');
     }

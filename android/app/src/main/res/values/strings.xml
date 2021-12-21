@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">ranujaBudget</string>
+    <string name="app_name">Budjet</string>
+    <string moduleConfig="true" name="CodePushDeploymentKey">quf9JmMumMoBs1JewvPREFaLr4hqHnzhnvbTP</string>
 </resources>

@@ -20,7 +20,6 @@ Sentry.init({
   dsn: Keys.REMOTE_LOGGER_KEY,
   enableAutoSessionTracking: true,
   environment: __DEV__ ? 'development' : 'production',
-  enableNative: false,
 });
 
 const adapter = new SQLiteAdapter({
@@ -31,7 +30,7 @@ const adapter = new SQLiteAdapter({
     // Database failed to load -- offer the user to reload the app or log out
     console.log(error);
   },
-  migrations: migrations,
+  // migrations: [],
 });
 export const WatermenlonDB = new Database({
   adapter,

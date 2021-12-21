@@ -1,12 +1,6 @@
 import {StackScreenProps} from '@react-navigation/stack';
 import React from 'react';
-import {
-  PermissionsAndroid,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {ActivityLoader, PressableButton} from '../../common';
 import {BillOperations} from '../../database';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
@@ -24,27 +18,6 @@ export default (props: Props) => {
     ExtraDetailTypes.DataProp[]
   >([]);
   const [totalAmount, setTotalAmount] = React.useState(0);
-
-  const checkPermission = async () => {
-    const permission = await PermissionsAndroid.check(
-      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-    );
-    console.log({permission});
-    if (!permission) {
-      const response = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-      );
-      if (response === 'granted') {
-        return true;
-      } else if (response === 'denied') {
-        Toast('Need Permission to download file.');
-        return false;
-      } else {
-        return false;
-      }
-    }
-    return true;
-  };
 
   React.useEffect(() => {
     props.navigation.setOptions({
@@ -69,7 +42,6 @@ export default (props: Props) => {
 
   const onGenerateReportButtonPressed = async () => {
     if (categoryData.length > 0) {
-      const granted = await checkPermission();
       const csv: TCSVBills[] = categoryData.map(item => {
         return {
           ...item,
@@ -77,9 +49,7 @@ export default (props: Props) => {
           billType: props.route.params.categoryName as 'expense' | 'income',
         };
       });
-      if (granted) {
-        await buildCSV(csv);
-      }
+      await buildCSV(csv, true);
     }
   };
   const getAllDataForOneCategory = async () => {

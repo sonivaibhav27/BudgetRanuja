@@ -5,6 +5,7 @@ import {useRecoilCallback} from 'recoil';
 import {PressableButton} from '../../../common';
 import {MainStackScreenType} from '../../../navigations/MainStack/types';
 import {CategoriesAtom} from '../../../State/Atoms';
+import {Theme} from '../../../theme&styles';
 import {TCategoryType} from '../../../types';
 
 interface Props {
@@ -22,11 +23,11 @@ export default ({navigation}: Props) => {
           getCategories.filter(category => category.IsDeleted! === 0),
         );
       },
-    [navigation],
+    [],
   );
   React.useEffect(() => {
     getCategoriesFromRecoil();
-  }, [getCategoriesFromRecoil, navigation]);
+  }, [getCategoriesFromRecoil]);
   const navigateToEditCategoy = (item: TCategoryType) => {
     navigation.navigate('EditCategory', {
       categoryId: item.CategoryId!,
@@ -34,8 +35,17 @@ export default ({navigation}: Props) => {
       categoryType: item.CategoryType!,
       allCategories: categories,
       comingFrom: 'Category',
+      categoryColor: item.CategoryColorCode,
     });
   };
+
+  const goToNewCategory = () => {
+    navigation.navigate('EditCategory', {
+      comingFrom: 'Category',
+      type: 'New',
+    });
+  };
+
   const renderItem = ({item}: {item: TCategoryType}) => {
     return (
       <PressableButton
@@ -57,11 +67,13 @@ export default ({navigation}: Props) => {
       keyExtractor={(item, index) => `${item.CategoryId}-${index}`}
       data={categories}
       renderItem={renderItem}
-      //   ListFooterComponent={
-      //     <Pressable>
-      //       <Text>Enter Your Own.</Text>
-      //     </Pressable>
-      //   }
+      ListFooterComponent={
+        <PressableButton
+          onPress={goToNewCategory}
+          style={styles.newCategoryContainer}>
+          <Text style={styles.newCategoryText}>Enter new category.</Text>
+        </PressableButton>
+      }
     />
   );
 };
@@ -77,11 +89,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginHorizontal: 20,
+    alignItems: 'center',
   },
   code: {
     width: 13,
     height: 13,
     borderRadius: 10,
   },
-  separator: {borderBottomWidth: 1, borderBottomColor: '#EEE'},
+  separator: {borderBottomWidth: 1, borderBottomColor: '#e7e7e7'},
+  newCategoryContainer: {
+    backgroundColor: Theme.ColorsTheme.primary,
+    marginHorizontal: 20,
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  newCategoryText: {
+    color: '#fff',
+    fontSize: 15,
+  },
 });

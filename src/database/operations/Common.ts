@@ -221,8 +221,6 @@ class CommonOperations {
           throw new Error('Error');
         }
       }
-      console.log({promise});
-
       if (!getCategories) {
         return {
           DBBills: promise[0]!,

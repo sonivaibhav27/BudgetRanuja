@@ -1,8 +1,10 @@
 import React from 'react';
 import {useSetRecoilState} from 'recoil';
+import OneSignal from 'react-native-onesignal';
 import {CommonOperations, CurrencyOperations} from '../database';
 import {BillsAtom, BudgetAtom, CategoriesAtom, UtilsAtom} from '../State/Atoms';
 import {DayJs} from '../utils';
+import {Keys} from '../config';
 
 export default () => {
   const [loading, setLoading] = React.useState(true);
@@ -43,6 +45,8 @@ export default () => {
   };
   React.useEffect(() => {
     init();
+    OneSignal.setLogLevel(6, 0);
+    OneSignal.setAppId(Keys.ONESIGNAL_KEY);
     //eslint-disable-next-line  react-hooks/exhaustive-deps
   }, []);
 

@@ -2,7 +2,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import React from 'react';
 import {StyleSheet, Text, View, Platform, Pressable} from 'react-native';
 import {MainStackScreenType} from '../../../navigations/MainStack/types';
-import {Miscellaneous} from '../../../utils';
+import {Icons, Miscellaneous} from '../../../utils';
 
 interface CardProps {
   typeOfBill?: string;
@@ -33,10 +33,15 @@ export default (props: CardProps) => {
         <View style={styles.categoryContainer}>
           <Text style={styles.categoryText}>{props.billCategory}</Text>
         </View>
-        <Text style={styles.amount}>
-          {props.currency}
-          {Miscellaneous.formatIntoCurrency(props.billAmount!)}
-        </Text>
+        <View style={styles.amountAndArrowContainer}>
+          <Text style={styles.amount}>
+            {props.currency}
+            {Miscellaneous.formatIntoCurrency(props.billAmount!)}
+          </Text>
+          <View style={styles.arrowContainer}>
+            <Icons.AntDesign size={15} name="arrowright" color="#000" />
+          </View>
+        </View>
       </Pressable>
     </View>
   );
@@ -84,5 +89,15 @@ const styles = StyleSheet.create({
   },
   categoryContainer: {
     flex: 1,
+  },
+  amountAndArrowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  arrowContainer: {
+    backgroundColor: 'rgba(163,94,0,0.07)',
+    padding: 4,
+    borderRadius: 50,
+    marginLeft: 5,
   },
 });

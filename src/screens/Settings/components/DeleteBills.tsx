@@ -9,7 +9,7 @@ const DeleteButtonText = [
   'Last 3 Month',
   'Last 6 Month',
   'Last Year',
-  'Delete All',
+  // 'Delete All',
 ];
 export default () => {
   const deleteBill = (deleteText: string) => {
@@ -28,6 +28,8 @@ export default () => {
         break;
       case DeleteButtonText[4]:
         CommonOperations.DeleteBills('delete_all');
+        break;
+      default:
         break;
     }
   };
@@ -50,7 +52,7 @@ export default () => {
 const styles = StyleSheet.create({
   buttonStyle: {
     backgroundColor: Theme.ColorsTheme.expense.borderColor,
-    padding: 15,
+    padding: 10,
     marginHorizontal: 20,
     borderRadius: 8,
     marginTop: 20,

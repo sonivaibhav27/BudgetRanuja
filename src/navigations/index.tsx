@@ -3,10 +3,12 @@ import React from 'react';
 import MainStack from './MainStack';
 import {Theme} from '../theme&styles';
 
-export default () => {
+const App = () => {
   return (
     <NavigationContainer theme={Theme.Colors_Dark}>
       <MainStack />
     </NavigationContainer>
   );
 };
+
+export default App;

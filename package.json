@@ -8,7 +8,9 @@
     "start": "react-native start --reset-cache",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "clean": "cd android && ./gradlew clean && cd .."
+    "clean": "cd android && ./gradlew clean && cd ..",
+    "makeSourceFile": "react-native bundle  --dev false  --platform android --entry-file index.js  --bundle-output index.android.bundle  --sourcemap-output index.android.bundle.map",
+    "uploadSourceFile": "node_modules/@sentry/cli/bin/sentry-cli releases --org ranuja --project . files com.budjet@1.0beta upload-sourcemaps  --dist 1 --strip-prefix . --rewrite index.android.bundle index.android.bundle.map"
   },
   "dependencies": {
     "@nozbe/watermelondb": "^0.24.0",
@@ -19,9 +21,11 @@
     "dayjs": "^1.10.7",
     "react": "17.0.2",
     "react-native": "0.66.0",
+    "react-native-code-push": "^7.0.4",
     "react-native-fs": "^2.18.0",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-month-year-picker": "^1.8.0",
+    "react-native-onesignal": "^4.3.3",
     "react-native-qonversion": "^3.1.1",
     "react-native-safe-area-context": "^3.3.2",
     "react-native-screens": "3.6.0",

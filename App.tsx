@@ -1,11 +1,4 @@
-import {withRecoil} from './src/hooks';
+import {withCodePush, withRecoil} from './src/hooks';
 import Navigation from './src/navigations';
 
-// export default () => {
-//   return (
-//     <RecoilRoot>
-//       <Navigation />
-//     </RecoilRoot>
-//   );
-// };
-export default withRecoil(Navigation);
+export default withRecoil(withCodePush(Navigation));

@@ -126,7 +126,6 @@ export const deleteBill = async (id: string) => {
 };
 
 export const getCurrentMonthBills = async (forYearAndMonth: number) => {
-  Logger.consoleLog('Started', 'log');
   try {
     let bills: BillModelType[] | undefined;
     bills = await WatermenlonDB.collections

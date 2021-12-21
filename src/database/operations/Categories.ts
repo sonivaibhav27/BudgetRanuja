@@ -6,7 +6,7 @@ import {Miscellaneous, Toast} from '../../utils';
 import IncomeCategories from '../../data/IncomeCategories';
 import {TCategoryType, CategoryModelType} from '../../types';
 
-const MAX_CATERGORY_ALLOWED = 15;
+const MAX_CATERGORY_ALLOWED = 16;
 class Category {
   static _rawDictionary: {[key: string]: [string, string]};
 
@@ -70,7 +70,7 @@ class Category {
   static async getAllCategories(): Promise<TCategoryType[] | undefined> {
     try {
       const categoryData: CategoryModelType[] = await this.getDBCollection()
-        .query(Q.where('IsDeleted', Q.notEq(1)))
+        .query()
         .fetch();
       let santitizeCategoryData: TCategoryType[] = categoryData.map(
         (data: CategoryModelType) => {
@@ -85,12 +85,25 @@ class Category {
       );
       this.createCategoryDictionary(santitizeCategoryData);
       return santitizeCategoryData;
-    } catch (err) {}
+    } catch (err) {
+      Toast('Error occur while loading categories, kindly reload the app.');
+    }
   }
 
-  static async saveCategory(categoryName: string, type: 'expense' | 'income') {
+  static async saveCategory(
+    categoryName: string,
+    type: 'expense' | 'income',
+    color: string,
+  ) {
+    if (categoryName.length === 0) {
+      Toast("Can't save empty category name.", 'SHORT');
+      return;
+    }
     const categoryId = Miscellaneous.GenerateUUID();
-    const prevCategoryLength = Object.keys(this._rawDictionary).length;
+    const prevCategoryLength = await this.getDBCollection()
+      .query()
+      .fetchCount();
+
     if (prevCategoryLength >= MAX_CATERGORY_ALLOWED) {
       Toast(`Total Categories allowed are ${MAX_CATERGORY_ALLOWED}`);
       return;
@@ -103,14 +116,17 @@ class Category {
           model.CategoryName = categoryName;
           model.CategoryType = categoryType;
           model.IsDeleted = 0;
+          model.CategoryColorCode = type === 'expense' ? color : '';
         });
       });
+      return await this.getAllCategories();
     } catch (err) {
       if (err.name === 'Diagnostic Error') {
         Toast('Something went failed with database ' + err.message);
-        return;
+        return null;
       }
       Toast(err.message);
+      return null;
     }
   }
 
@@ -137,10 +153,10 @@ class Category {
 
   static async updateCategory(
     categoryId: string,
-    prevCategoryName: string,
     newCategoryName: string,
+    categoryColor: string,
   ) {
-    if (prevCategoryName === newCategoryName || categoryId.length === 0) {
+    if (categoryId.length === 0) {
       return;
     }
     if (newCategoryName.length === 0) {
@@ -161,16 +177,15 @@ class Category {
       await WatermenlonDB.write(async () => {
         getCategoryFromDB[0].update((category: CategoryModelType) => {
           category.CategoryName = newCategoryName;
+          category.CategoryColorCode = categoryColor;
         });
       });
-      //new object to reflect changed category name with other screen.
-      const prev = this._rawDictionary[categoryId];
+      // new object to reflect changed category name with other screen.
       delete this._rawDictionary[categoryId];
       this._rawDictionary = {
         ...this._rawDictionary,
-        [categoryId]: [newCategoryName, prev[1]],
+        [categoryId]: [newCategoryName, categoryColor],
       };
-      console.log({Dictionary: this._rawDictionary});
       Toast('Updated Successfully');
       return true;
     } catch (err) {

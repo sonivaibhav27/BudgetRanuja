@@ -13,6 +13,7 @@ import java.util.List;
 import com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage; // ⬅️ This!
 import com.facebook.react.bridge.JSIModulePackage; // ⬅️ This
 import com.rnfs.RNFSPackage;
+import com.microsoft.codepush.react.CodePush;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -41,6 +42,10 @@ public class MainApplication extends Application implements ReactApplication {
           protected JSIModulePackage getJSIModulePackage() {
             return new WatermelonDBJSIPackage(); // ⬅️ This!
          }
+          @Override
+        protected String getJSBundleFile() {
+            return CodePush.getJSBundleFile();
+        }
       };
 
   @Override
