@@ -162,6 +162,7 @@ export const getBillsByCategoriesAndMonth = async (
           Q.where('Category_Id', Q.eq(categoryId)),
           Q.where('DateAsYearAndMonth', monthAndYear),
         ),
+        Q.sortBy('Date_at'),
       )
       .fetch();
     const sanitize = bills.map(bill => {
@@ -188,7 +189,10 @@ export const getBillsByDateInDetailForCSV = async (
     let bills: BillModelType[] | undefined;
     bills = await WatermenlonDB.collections
       .get(DatabaseConfig.tables.BudgetBills)
-      .query(Q.where('DateAsYearAndMonth', Q.eq(dateAsYearAndMonth)))
+      .query(
+        Q.where('DateAsYearAndMonth', Q.eq(dateAsYearAndMonth)),
+        Q.sortBy('Date_at', Q.asc),
+      )
       .fetch();
     const sanitize: TCSVBills[] = bills.map(bill => {
       return {
