@@ -1,4 +1,5 @@
 import React from 'react';
+import {I18nManager} from 'react-native';
 import {useSetRecoilState} from 'recoil';
 import OneSignal from 'react-native-onesignal';
 import {CommonOperations, CurrencyOperations} from '../database';
@@ -44,6 +45,8 @@ export default () => {
     getDataFromDatabase();
   };
   React.useEffect(() => {
+    // I18nManager.allowRTL(false);
+    I18nManager.forceRTL(false);
     init();
     OneSignal.setLogLevel(6, 0);
     OneSignal.setAppId(Keys.ONESIGNAL_KEY);

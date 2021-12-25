@@ -25,7 +25,12 @@ const checkPermission = async () => {
 };
 
 const getFileName = (fileName: string) => {
-  return `/${fileName}-budjet.csv`;
+  return (
+    DownloadDirectoryPath +
+    `/${fileName}-${new Date().getUTCMilliseconds()}${(
+      Math.random() * 1000
+    ).toFixed(0)}-budjet.csv`
+  );
 };
 export default async (data: TCSVBills[], fileNameByCategory?: boolean) => {
   const permission = await checkPermission();
@@ -33,23 +38,40 @@ export default async (data: TCSVBills[], fileNameByCategory?: boolean) => {
     const fileName = fileNameByCategory
       ? data[0].categoryName
       : DayJs.todayDate().format('DD-MM-YYYY');
-    const headers = 'Date,Bill Type,Bill Category,Amount,Remark';
-    const body = data
-      .map(
-        bill =>
-          `${
-            bill.billDate!.getDate().toString() +
-            '/' +
-            (bill.billDate!.getMonth() + 1).toString() +
-            '/' +
-            bill.billDate!.getFullYear()
-          },${bill.billType},${bill.categoryName},${bill.billAmount},${
-            bill.billRemark
-          }\n`,
-      )
-      .join('');
+    let headers, body;
+    if (!fileNameByCategory) {
+      headers = 'Date,Bill Type,Bill Category,Amount,Remark';
+      body = data
+        .map(
+          bill =>
+            `${
+              bill.billDate!.getDate().toString() +
+              '/' +
+              (bill.billDate!.getMonth() + 1).toString() +
+              '/' +
+              bill.billDate!.getFullYear()
+            },${bill.billType},${bill.categoryName},${bill.billAmount},${
+              bill.billRemark
+            }\n`,
+        )
+        .join('');
+    } else {
+      headers = 'Date,Amount,Remark';
+      body = data
+        .map(
+          bill =>
+            `${
+              bill.billDate!.getDate().toString() +
+              '/' +
+              (bill.billDate!.getMonth() + 1).toString() +
+              '/' +
+              bill.billDate!.getFullYear()
+            },${bill.billAmount},${bill.billRemark}\n`,
+        )
+        .join('');
+    }
     const csv = `${headers}\n${body}`;
-    writeFile(DownloadDirectoryPath + getFileName(fileName), csv)
+    writeFile(getFileName(fileName), csv)
       .then(() => {
         Alert.alert(
           'Success',

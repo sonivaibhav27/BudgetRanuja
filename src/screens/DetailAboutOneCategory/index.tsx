@@ -46,7 +46,7 @@ export default (props: Props) => {
         return {
           ...item,
           categoryName: props.route.params.categoryName,
-          billType: props.route.params.categoryName as 'expense' | 'income',
+          billType: props.route.params.billType as 'expense' | 'income',
         };
       });
       await buildCSV(csv, true);
