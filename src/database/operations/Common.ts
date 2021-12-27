@@ -236,6 +236,18 @@ class CommonOperations {
       Toast('Error while getting data from database', 'LONG');
     }
   }
+
+  /**
+   * @description It will populate database with data from another  🍉  database file.
+   */
+  static async PopulateDBFromFile() {
+    //validate if the database is real db file.
+    // const getDbName = '';
+    // SQLiteAdapter({
+    //   schema: Schema,
+    //   dbName: getDbName,
+    // });
+  }
 }
 
 export default CommonOperations;
