@@ -9,7 +9,7 @@ import {TCategoryType, CategoryModelType} from '../../types';
 const MAX_CATERGORY_ALLOWED = 16;
 class Category {
   static _rawDictionary: {[key: string]: [string, string]};
-
+  static colorCategoriesFromBackend = null;
   static getDictionary() {
     return this._rawDictionary;
   }
