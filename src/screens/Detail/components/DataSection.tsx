@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import React from 'react';
-import {FlatList, StyleSheet, Text, View} from 'react-native';
+import {FlatList} from 'react-native';
 import {
   useRecoilRefresher_UNSTABLE,
   useRecoilValue,
@@ -53,14 +53,3 @@ export default (props: Props) => {
     />
   );
 };
-
-const styles = StyleSheet.create({
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: '#000',
-  },
-});
