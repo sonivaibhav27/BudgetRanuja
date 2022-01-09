@@ -7,3 +7,4 @@ export {default as Toast} from './Toast';
 export {default as GroupByCategories} from './GroupbyCategories';
 export * as Miscellaneous from './Misc';
 export {default as FetchColorsFromBackend} from './fetchCategoriesColor';
+export {default as QonversionManager} from './Qonversion';

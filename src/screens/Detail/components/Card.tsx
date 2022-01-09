@@ -1,6 +1,7 @@
 import {StackNavigationProp} from '@react-navigation/stack';
 import React from 'react';
 import {StyleSheet, Text, View, Platform, Pressable} from 'react-native';
+import {loadRewardAd} from '../../../hooks';
 import {MainStackScreenType} from '../../../navigations/MainStack/types';
 import {Icons, Miscellaneous} from '../../../utils';
 
@@ -16,14 +17,18 @@ interface CardProps {
 
 export default (props: CardProps) => {
   const navigateToDetailAboutOneCategory = () => {
-    if (props.billCategory?.length) {
-      props.navigation.navigate('DetailAboutOneCategory', {
-        categoryName: props.billCategory,
-        monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
-        billType: props.billType!,
-        currency: props.currency,
-      });
-    }
+    const [loadAd, setupAdsEventHandler] = loadRewardAd(() => {
+      if (props.billCategory?.length) {
+        props.navigation.navigate('DetailAboutOneCategory', {
+          categoryName: props.billCategory,
+          monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
+          billType: props.billType!,
+          currency: props.currency,
+        });
+      }
+    });
+    const event = setupAdsEventHandler();
+    loadAd();
   };
   return (
     <View style={styles.outerContainer}>

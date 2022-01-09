@@ -104,6 +104,7 @@ export default (_: Props) => {
   React.useEffect(() => {
     init();
   }, [init]);
+
   const callMonthPickerFunction = async (event: string, newDate: Date) => {
     console.log({newDate});
     switch (event) {

@@ -1,69 +1,171 @@
 import {StackScreenProps} from '@react-navigation/stack';
 import React from 'react';
-import {Text, View, StyleSheet, Alert} from 'react-native';
-import {PressableButton} from '../../common';
+import {
+  View,
+  StyleSheet,
+  Image,
+  Dimensions,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
+import {Product} from 'react-native-qonversion';
+import {PressableButton, ActivityLoader} from '../../common';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
-import {Icons} from '../../utils';
+import {Theme} from '../../theme&styles';
+import {Icons, QonversionManager} from '../../utils';
 
 type Props = StackScreenProps<MainStackScreenType, 'Pricing'>;
+
+const features = [
+  'Unlimited Categories',
+  'View Extra Detail without Ads',
+  'Download Report without Ads',
+];
+const {width} = Dimensions.get('window');
+const APP_ICON_SIZE = width * 0.33;
 export default (props: Props) => {
-  if (props.route.params.version.includes('beta')) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.headerTitle}>Early Access </Text>
-        <Text style={styles.paragraph}>
-          As this is Early Access App, You can use premium feature free of cost.
-          {'\n\n'}If you like our App , kindly review us at play store to
-          support us.
-        </Text>
-        <PressableButton
-          onPress={() => Alert.alert('Not Implemented')}
-          style={styles.reviewContainer}>
-          <Icons.Entypo name="google-play" color="#fff" size={25} />
-          <Text style={styles.reviewText}>Review on Play Store</Text>
-        </PressableButton>
-      </View>
-    );
+  const [productState, setProductState] = React.useState<Product | null>(null);
+  const [isUserMakingPayment, setIsUserMakingPayment] = React.useState(false);
+  const getProductsFromQonversion = async () => {
+    const product = await QonversionManager.getOfferings();
+    setProductState(product!);
+  };
+  React.useEffect(() => {
+    getProductsFromQonversion();
+  }, []);
+  const makePayment = async () => {
+    setIsUserMakingPayment(true);
+    if (
+      productState !== null &&
+      typeof productState.prettyPrice !== 'undefined'
+    ) {
+      await QonversionManager.makePayment(productState.qonversionID);
+    }
+    setIsUserMakingPayment(false);
+  };
+  if (productState === null) {
+    return <ActivityLoader loadingText="Loading..." />;
   }
-  return null;
+  return (
+    <ScrollView style={styles.container}>
+      <PressableButton
+        onPress={() => props.navigation.goBack()}
+        style={styles.crossContainer}>
+        <Icons.Entypo name="cross" size={25} color="#000" />
+      </PressableButton>
+      <View style={styles.contentContainer}>
+        <View style={styles.imageContainer}>
+          <Image
+            style={[
+              styles.appIcon,
+              {width: APP_ICON_SIZE, height: APP_ICON_SIZE},
+            ]}
+            source={require('../../assets/images/Icon.png')}
+          />
+        </View>
+        <View style={styles.featureContainer}>
+          {features.map(feature => {
+            return (
+              <View style={styles.featureStyle} key={feature}>
+                <Icons.Entypo
+                  name="check"
+                  size={18}
+                  color={Theme.ColorsTheme.primary}
+                />
+                <Text style={styles.featureText}>{feature}</Text>
+              </View>
+            );
+          })}
+        </View>
+        <View>
+          <PressableButton
+            disable={isUserMakingPayment}
+            onPress={makePayment}
+            style={styles.purchaseButton}>
+            {isUserMakingPayment ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.purchaseText}>
+                {productState.prettyPrice} / Lifetime
+              </Text>
+            )}
+          </PressableButton>
+        </View>
+        <View>
+          <Text style={styles.info}>
+            By purchasing you will also help the developer to include amazing
+            feature and also adhere to the privacy policy by purchasing
+          </Text>
+        </View>
+      </View>
+    </ScrollView>
+  );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 30,
+    backgroundColor: '#fff',
   },
-  headerTitle: {
-    fontSize: 30,
-    color: '#000',
-    fontWeight: '700',
-    // alignSelf: 'flex-start',
-    textTransform: 'uppercase',
-    marginBottom: 20,
-    textAlign: 'center',
+  crossContainer: {
+    backgroundColor: '#f1f1f1',
+    borderRadius: 40,
+    padding: 8,
+    alignSelf: 'flex-start',
+    margin: 20,
   },
-  paragraph: {
-    // textAlign: 'center',
+  appIcon: {
+    borderRadius: 100,
+  },
+  contentContainer: {
     marginTop: 10,
-    fontWeight: '500',
-    color: '#333',
-    fontSize: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
   },
-  reviewContainer: {
-    backgroundColor: '#02875F',
-    paddingHorizontal: 15,
-    marginTop: 40,
-    borderRadius: 4,
+  imageContainer: {
+    alignItems: 'center',
+  },
+  featureStyle: {
+    backgroundColor: '#FFF',
+    // elevation: 2,
+    borderRadius: 8,
+    marginBottom: 2,
+    padding: 10,
+    marginHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
   },
-  reviewText: {
-    color: '#fff',
-    marginLeft: 5,
-    fontSize: 22,
-    fontWeight: '500',
+  featureText: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  featureContainer: {
+    marginTop: 20,
+  },
+  purchaseButton: {
+    backgroundColor: Theme.ColorsTheme.primary,
+    marginHorizontal: 20,
+    padding: 12,
+    borderRadius: 2,
+    alignItems: 'center',
+    alignSelf: 'center',
+    minWidth: 200,
+    marginTop: 30,
+  },
+  purchaseText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  info: {
+    fontSize: 12,
+    marginHorizontal: 20,
+    marginTop: 8,
+    textAlign: 'center',
+    color: '#aaa',
   },
 });

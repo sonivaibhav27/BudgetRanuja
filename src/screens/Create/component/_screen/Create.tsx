@@ -20,6 +20,7 @@ import RowItem from '../RowItem';
 import {GlobalStyle} from '../../../../theme&styles';
 import {Input, Modal, PressableButton} from '../../../../common';
 import CheckBox from '../CheckBox';
+import {UseBannerAD} from '../../../../hooks';
 
 type Props = {
   route: RouteProp<MainStackScreenType, 'Create'>;
@@ -197,6 +198,9 @@ const CreateScreen = ({route}: Props) => {
           data={Category(route.params.comingFrom, categoryFromRecoil)}
         />
       )}
+      <View style={{bottom: 0}}>
+        <UseBannerAD nonPersonalized={true} />
+      </View>
     </SafeAreaView>
   );
 };

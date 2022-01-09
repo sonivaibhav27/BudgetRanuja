@@ -4,7 +4,7 @@ import {useSetRecoilState} from 'recoil';
 import OneSignal from 'react-native-onesignal';
 import {CommonOperations, CurrencyOperations} from '../database';
 import {BillsAtom, BudgetAtom, CategoriesAtom, UtilsAtom} from '../State/Atoms';
-import {DayJs} from '../utils';
+import {DayJs, QonversionManager} from '../utils';
 import {Keys} from '../config';
 
 export default () => {
@@ -17,6 +17,7 @@ export default () => {
   );
   const setCurrencyInRecoil = useSetRecoilState(UtilsAtom.Currency);
   const setCategoriesInRecoil = useSetRecoilState(CategoriesAtom.AllCategories);
+  const setPremiumStatusOfUser = useSetRecoilState(UtilsAtom.PremiumUser);
 
   const getDataFromDatabase = async () => {
     try {
@@ -41,7 +42,12 @@ export default () => {
     }
   };
 
+  const getPreimumStatusOfUser = async () => {
+    const isPremium = await QonversionManager.getActivePermission();
+    setPremiumStatusOfUser(isPremium);
+  };
   const init = () => {
+    getPreimumStatusOfUser();
     getDataFromDatabase();
   };
   React.useEffect(() => {
