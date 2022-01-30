@@ -1,23 +1,31 @@
+import {GoogleAdsTypes} from '@invertase/react-native-google-ads';
 import {StackScreenProps} from '@react-navigation/stack';
 import React from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {ActivityLoader, PressableButton} from '../../common';
 import {BillOperations} from '../../database';
+import {loadRewardAd} from '../../hooks';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {Theme} from '../../theme&styles';
 import {ExtraDetailTypes, TCSVBills} from '../../types';
-import {buildCSV, Miscellaneous, Toast} from '../../utils';
+import {buildCSV, Miscellaneous, PopupMessage, Toast} from '../../utils';
 import {ListOfBills, TotalSection} from './components';
 
 type Props = StackScreenProps<MainStackScreenType, 'DetailAboutOneCategory'>;
 
 export default (props: Props) => {
+  const [loadAd, adEventHandler, rewardedInstance] = loadRewardAd();
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [categoryData, setCategoryData] = React.useState<
     ExtraDetailTypes.DataProp[]
   >([]);
   const [totalAmount, setTotalAmount] = React.useState(0);
+  const [loadingAd, setLoadingAd] = React.useState(false);
+  const watchAdRef = React.useRef<boolean>(false);
+
+  const adRewardedRef =
+    React.useRef<GoogleAdsTypes.RewardedAd>(rewardedInstance);
 
   React.useEffect(() => {
     props.navigation.setOptions({
@@ -32,15 +40,35 @@ export default (props: Props) => {
         );
       },
     });
+
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryData, props.navigation]);
+
+  React.useEffect(() => {
+    const event = adEventHandler(
+      adRewardedRef.current,
+      onSuccessAdWatchedCallback,
+      () => {
+        setLoadingAd(false);
+      },
+      onAdClosed,
+      () => {
+        watchAdRef.current = false;
+        downloadCSV();
+      },
+    );
+    return () => event();
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoryData]);
   React.useEffect(() => {
     getAllDataForOneCategory();
-
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onGenerateReportButtonPressed = async () => {
+  const downloadCSV = async () => {
+    console.log({
+      categoryData,
+    });
     if (categoryData.length > 0) {
       const csv: TCSVBills[] = categoryData.map(item => {
         return {
@@ -50,9 +78,28 @@ export default (props: Props) => {
         };
       });
       await buildCSV(csv, true);
+      watchAdRef.current = false;
     }
   };
+  const onAdClosed = async () => {
+    if (watchAdRef.current) {
+      await downloadCSV();
+    }
+  };
+  const onSuccessAdWatchedCallback = () => {
+    watchAdRef.current = true;
+  };
+  const onGenerateReportButtonPressed = async () => {
+    PopupMessage(
+      '',
+      'This is premium feature, Watch ads to see the bill in detail',
+      () => {
+        loadAd(adRewardedRef.current);
+      },
+    );
+  };
   const getAllDataForOneCategory = async () => {
+    console.log(props.route.params);
     setLoading(true);
     setError(null);
     try {
@@ -110,6 +157,11 @@ export default (props: Props) => {
           </PressableButton>
         </View>
       )}
+      {loadingAd && (
+        <View style={styles.overlayCenter}>
+          <ActivityLoader loadingText="loading ad..." />
+        </View>
+      )}
     </View>
   );
 };
@@ -148,5 +200,11 @@ const styles = StyleSheet.create({
   },
   exportToCSVText: {
     color: '#fff',
+  },
+  overlayCenter: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
 });

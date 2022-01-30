@@ -119,6 +119,7 @@ const CreateScreen = ({route}: Props) => {
         Toast(err.message, 'LONG');
         return;
       }
+      Toast(err?.message);
     }
   };
 

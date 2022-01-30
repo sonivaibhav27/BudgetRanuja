@@ -11,7 +11,8 @@ type Props = {
     | 'dollar'
     | 'circle-with-plus'
     | 'mail'
-    | 'delete';
+    | 'delete'
+    | 'lock';
   showChevronRightIcon?: boolean;
   iconFamily: 'Entypo' | 'Fontisco' | 'AntDesign';
   onPress: () => void;
@@ -26,13 +27,15 @@ const IconButton = (props: Props) => {
       : Icons.AntDesign;
   return (
     <PressableButton onPress={props.onPress} style={styles.container}>
-      <View style={styles.iconAndTextContainer}>
-        <Icon name={props.iconName} size={25} color="#000" />
-        <Text style={styles.textStyle}>{props.text}</Text>
-      </View>
-      {props.showChevronRightIcon && (
-        <Icons.Entypo name={'chevron-right'} size={25} color="#000" />
-      )}
+      <>
+        <View style={styles.iconAndTextContainer}>
+          <Icon name={props.iconName} size={25} color="#000" />
+          <Text style={styles.textStyle}>{props.text}</Text>
+        </View>
+        {props.showChevronRightIcon && (
+          <Icons.Entypo name={'chevron-right'} size={25} color="#000" />
+        )}
+      </>
     </PressableButton>
   );
 };

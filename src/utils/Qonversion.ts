@@ -9,7 +9,9 @@ class QonversionManager {
   static permissionId = 'Premium';
 
   static launchQonversionSDK() {
-    Qonversion.launchWithKey(Keys.PURCHASE_SDK_KEY, false);
+    try {
+      Qonversion.launchWithKey(Keys.PURCHASE_SDK_KEY, false);
+    } catch (err) {}
   }
   /**
    * @description Check for the active purchase user have made.

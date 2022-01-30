@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   selected: {
     backgroundColor: 'rgb(89,93,229)',
     padding: 7,
-    borderRadius: 8,
+    borderRadius: 2,
     color: '#fff',
     fontWeight: '600',
   },

@@ -4,7 +4,6 @@ import {
   BannerAdSize,
   TestIds,
 } from '@invertase/react-native-google-ads';
-import {Toast} from '../../utils';
 
 export default ({nonPersonalized}: {nonPersonalized: boolean}) => {
   return (
@@ -13,9 +12,6 @@ export default ({nonPersonalized}: {nonPersonalized: boolean}) => {
       unitId={TestIds.BANNER}
       requestOptions={{
         requestNonPersonalizedAdsOnly: nonPersonalized,
-      }}
-      onAdFailedToLoad={err => {
-        Toast(err.message);
       }}
     />
   );

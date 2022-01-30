@@ -148,8 +148,11 @@ android {
         applicationId "com.ranujabudget"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 8
-        versionName "1.2.1"
+        versionCode 9
+        versionName "1.2.2-beta"
+        configurations.all {
+            resolutionStrategy { force 'androidx.work:work-runtime:2.6.0' }
+        }
     }
     splits {
         abi {

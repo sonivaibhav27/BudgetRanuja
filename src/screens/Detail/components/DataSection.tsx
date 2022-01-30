@@ -14,6 +14,8 @@ import EmptyScreen from './Empty';
 
 type Props = {
   monthAndYearOfBillToShow: number;
+  loadAd: () => void;
+  selectedCardForAd: any;
 };
 
 export default (props: Props) => {
@@ -21,6 +23,7 @@ export default (props: Props) => {
   const bills = useRecoilValue(DetailState.DetailDataBasedOnSelectedType);
   const currency = useRecoilValue(UtilsAtom.Currency);
   useRecoilRefresher_UNSTABLE(DetailState.DetailDataBasedOnSelectedType);
+
   React.useEffect(() => {
     setSelectedType('expense');
     //eslint-disable-next-line react-hooks/exhaustive-deps
@@ -28,14 +31,17 @@ export default (props: Props) => {
 
   const navigation =
     useNavigation<StackNavigationProp<MainStackScreenType, 'Detail'>>();
+
   return (
     <FlatList
       contentContainerStyle={{flex: 1}}
-      data={bills[1].length === 0 ? [] : bills[0]}
+      data={bills[0].length === 0 ? [] : bills[0]}
       keyExtractor={(_, index) => index.toString()}
       renderItem={({item}) => {
         return (
           <Card
+            selectedCardForAd={props.selectedCardForAd}
+            loadAd={props.loadAd}
             currency={currency}
             monthAndYearOfBillToShow={props.monthAndYearOfBillToShow}
             navigation={navigation}

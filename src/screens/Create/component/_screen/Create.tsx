@@ -198,7 +198,7 @@ const CreateScreen = ({route}: Props) => {
           data={Category(route.params.comingFrom, categoryFromRecoil)}
         />
       )}
-      <View style={{bottom: 0}}>
+      <View style={styles.adContainer}>
         <UseBannerAD nonPersonalized={true} />
       </View>
     </SafeAreaView>
@@ -225,6 +225,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  adContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });
 

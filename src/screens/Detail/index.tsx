@@ -14,10 +14,12 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {useRecoilCallback, useSetRecoilState} from 'recoil';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {AuditSection, ActionButtons, DataSection} from './components';
-import {buildCSV, DayJs, Icons, Toast} from '../../utils';
+import {buildCSV, DayJs, Icons, PopupMessage, Toast} from '../../utils';
 import {BillOperations, BudgetOperations} from '../../database';
 import {BillsAtom, BudgetAtom, DetailState} from '../../State/Atoms';
 import {ActivityLoader} from '../../common';
+import {loadRewardAd} from '../../hooks';
+import {GoogleAdsTypes} from '@invertase/react-native-google-ads';
 
 type Props = {
   navigation: StackNavigationProp<MainStackScreenType, 'Detail'>;
@@ -42,7 +44,10 @@ const formateDateToGetMonthAndYear = (date: Date) => {
 };
 export default (_: Props) => {
   const {height} = useWindowDimensions();
+  const [loadAd, adEventHandler, rewardedInstance] = loadRewardAd();
+  //const [loadAd, isWatchedAd] = loadRewardAd();
   const [generatingCsv, setGeneratingCsv] = React.useState(false);
+  const [loadingAd, setLoadingAd] = React.useState(false);
   const [dateToShowBillsFor, setDateToShowBillsFor] = React.useState(
     new Date(),
   );
@@ -50,9 +55,22 @@ export default (_: Props) => {
   const toggleMonthPicker = () => {
     setMonthPickerVisible(!monthPickerVisible);
   };
+  const watchedAdRef = React.useRef<boolean>(false);
+  const watchAdFromWhichSource = React.useRef<
+    'Report' | 'Bill In Detail' | null
+  >(null);
 
   const setDetailAllBills = useSetRecoilState(DetailState.DetailAllBills);
   const setDetailBudget = useSetRecoilState(BudgetAtom.DetailBudgetAtom);
+  const currentCard = React.useRef<{
+    categoryName: string;
+    monthAndYearOfBillToShow: number;
+    billType: string;
+    currency: string;
+  } | null>(null);
+  console.log('Detail screen loaded.');
+  const adsRewardedRef =
+    React.useRef<GoogleAdsTypes.RewardedAd>(rewardedInstance);
   const init = useRecoilCallback(
     ({snapshot}) =>
       () => {
@@ -69,6 +87,94 @@ export default (_: Props) => {
   );
 
   const onGenerateReportButtonPressed = async () => {
+    PopupMessage(
+      '',
+      'This is premium feature, Watch ads to see the bill in detail',
+      () => {
+        watchAdFromWhichSource.current = 'Report';
+        setLoadingAd(true);
+        loadAd(adsRewardedRef.current!);
+      },
+    );
+  };
+
+  React.useEffect(() => {
+    console.log('Called From DEtail ');
+    _.navigation.setOptions({
+      headerRight: () => {
+        return (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={onGenerateReportButtonPressed}
+            style={styles.exportToCSVContainer}>
+            <Text style={styles.exportToCSVText}> &#x25a6; Export as csv</Text>
+          </TouchableOpacity>
+        );
+      },
+    });
+
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [_.navigation]);
+
+  const _loadAd = () => {
+    setLoadingAd(true);
+    console.log('Load AD', adsRewardedRef.current);
+    loadAd(adsRewardedRef.current!);
+  };
+
+  React.useEffect(() => {
+    // _.navigation.addListener('focus', () => {
+    //   adsRewardedRef.current = rewardedInstance;
+    let event: Function | undefined;
+    event = adEventHandler(
+      adsRewardedRef.current,
+      onSuccessRewardAdCallback,
+      () => {
+        setLoadingAd(false);
+      },
+      onAdClosed,
+      () => {
+        watchedAdRef.current = false;
+        watchAdFromWhichSource.current = null;
+      },
+    );
+
+    return () => event!();
+    // });
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onAdClosed = () => {
+    if (watchedAdRef.current) {
+      if (
+        watchAdFromWhichSource.current != null &&
+        watchAdFromWhichSource.current === 'Report'
+      ) {
+        _generateCSV();
+        watchedAdRef.current = false;
+        watchAdFromWhichSource.current = null;
+      } else {
+        watchedAdRef.current = false;
+        watchAdFromWhichSource.current = null;
+        if (currentCard.current === null) {
+          Toast('Something went wrong. Please reload the app.');
+          return;
+        }
+        _.navigation.navigate('DetailAboutOneCategory', {
+          categoryName: currentCard.current?.categoryName!,
+          billType: currentCard.current?.billType! as 'income' | 'expense',
+          currency: currentCard.current?.currency!,
+          monthAndYearOfBillToShow:
+            currentCard.current?.monthAndYearOfBillToShow!,
+        });
+      }
+    }
+  };
+  const onSuccessRewardAdCallback = () => {
+    watchedAdRef.current = true;
+  };
+
+  const _generateCSV = async () => {
     setGeneratingCsv(true);
     try {
       const yearAndMonth = DayJs.getYearAndMonthFromDate(dateToShowBillsFor);
@@ -84,23 +190,6 @@ export default (_: Props) => {
       setGeneratingCsv(false);
     }
   };
-
-  React.useEffect(() => {
-    _.navigation.setOptions({
-      headerRight: () => {
-        return (
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={onGenerateReportButtonPressed}
-            style={styles.exportToCSVContainer}>
-            <Text style={styles.exportToCSVText}> &#x25a6; Export as csv</Text>
-          </TouchableOpacity>
-        );
-      },
-    });
-    //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   React.useEffect(() => {
     init();
   }, [init]);
@@ -142,6 +231,8 @@ export default (_: Props) => {
       </View>
       <View style={styles.dataContainer}>
         <DataSection
+          selectedCardForAd={currentCard}
+          loadAd={_loadAd}
           monthAndYearOfBillToShow={DayJs.getYearAndMonthFromDate(
             dateToShowBillsFor,
           )}
@@ -161,6 +252,11 @@ export default (_: Props) => {
       {generatingCsv && (
         <View style={styles.overlayCenter}>
           <ActivityLoader loadingText="Generating Csv..." />
+        </View>
+      )}
+      {loadingAd && (
+        <View style={styles.overlayCenter}>
+          <ActivityLoader loadingText="loading ad..." />
         </View>
       )}
     </View>

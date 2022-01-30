@@ -1,9 +1,8 @@
 import {StackNavigationProp} from '@react-navigation/stack';
 import React from 'react';
 import {StyleSheet, Text, View, Platform, Pressable} from 'react-native';
-import {loadRewardAd} from '../../../hooks';
 import {MainStackScreenType} from '../../../navigations/MainStack/types';
-import {Icons, Miscellaneous} from '../../../utils';
+import {Icons, Miscellaneous, PopupMessage} from '../../../utils';
 
 interface CardProps {
   typeOfBill?: string;
@@ -13,23 +12,33 @@ interface CardProps {
   monthAndYearOfBillToShow: number;
   billType?: 'income' | 'expense';
   currency: string;
+  loadAd: () => void;
+  selectedCardForAd: any;
 }
 
 export default (props: CardProps) => {
   const navigateToDetailAboutOneCategory = () => {
-    const [loadAd, setupAdsEventHandler] = loadRewardAd(() => {
-      if (props.billCategory?.length) {
-        props.navigation.navigate('DetailAboutOneCategory', {
-          categoryName: props.billCategory,
+    PopupMessage(
+      '',
+      'This is premium feature, Watch ads to see the bill in detail',
+      () => {
+        props.loadAd();
+        props.selectedCardForAd.current = {
+          categoryName: props.billCategory!,
           monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
           billType: props.billType!,
           currency: props.currency,
-        });
-      }
-    });
-    const event = setupAdsEventHandler();
-    loadAd();
+        };
+        // setCurrentCategoryWatchedAd({
+        //   categoryName: props.billCategory!,
+        //   monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
+        //   billType: props.billType!,
+        //   currency: props.currency,
+        // });
+      },
+    );
   };
+
   return (
     <View style={styles.outerContainer}>
       <Pressable

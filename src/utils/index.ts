@@ -8,3 +8,4 @@ export {default as GroupByCategories} from './GroupbyCategories';
 export * as Miscellaneous from './Misc';
 export {default as FetchColorsFromBackend} from './fetchCategoriesColor';
 export {default as QonversionManager} from './Qonversion';
+export {default as PopupMessage} from './Alert';
