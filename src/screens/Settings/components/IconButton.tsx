@@ -12,19 +12,19 @@ type Props = {
     | 'circle-with-plus'
     | 'mail'
     | 'delete'
-    | 'lock';
+    | 'lock'
+    | 'clipboard-notes';
   showChevronRightIcon?: boolean;
-  iconFamily: 'Entypo' | 'Fontisco' | 'AntDesign';
+  iconFamily: 'Entypo' | 'Fontisto' | 'AntDesign' | 'Foundation';
   onPress: () => void;
 };
 
+const getIconFamily = (iconFamily: Props['iconFamily']) => {
+  return Icons[iconFamily];
+};
+
 const IconButton = (props: Props) => {
-  const Icon =
-    props.iconFamily === 'Entypo'
-      ? Icons.Entypo
-      : props.iconFamily === 'Fontisco'
-      ? Icons.Fontisto
-      : Icons.AntDesign;
+  const Icon = getIconFamily(props.iconFamily);
   return (
     <PressableButton onPress={props.onPress} style={styles.container}>
       <>

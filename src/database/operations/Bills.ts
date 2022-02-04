@@ -1,6 +1,6 @@
 import {Q} from '@nozbe/watermelondb';
 import {DatabaseConfig} from '../../config';
-import {DayJs, Logger, Toast} from '../../utils';
+import {DayJs, Logger, Miscellaneous, Toast} from '../../utils';
 import {WatermenlonDB} from '../../..';
 import {
   BillModelType,
@@ -179,6 +179,44 @@ export const getBillsByCategoriesAndMonth = async (
   } catch (err) {
     Logger.consoleLog('Error in getting individual Category ' + err, 'error');
     return [];
+  }
+};
+
+export const generateReportData = async (date: Date, categoryName: string) => {
+  try {
+    let categoryId: string | undefined;
+    if (categoryName.length > 0) {
+      categoryId = Miscellaneous.findKeyByValue(categoryName);
+      if (typeof categoryId === 'undefined') {
+        throw Error('Something went wrong, please reload the app.');
+      }
+    }
+    const yearAndMonth = DayJs.getYearAndMonthFromDate(date);
+    let condition = categoryName
+      ? Q.and(
+          Q.where('DateAsYearAndMonth', Q.eq(yearAndMonth)),
+          Q.where('Category_Id', Q.eq(categoryId!)),
+        )
+      : Q.where('DateAsYearAndMonth', Q.eq(yearAndMonth));
+    let bills: BillModelType[] | undefined;
+    bills = await WatermenlonDB.collections
+      .get(DatabaseConfig.tables.BudgetBills)
+      .query(condition, Q.sortBy('Date_at', Q.asc))
+      .fetch();
+    const sanitize: TCSVBills[] = bills.map(bill => {
+      return {
+        billAmount: bill.billAmount!,
+        billDate: bill.billDate!,
+        billRemark: bill.billRemark!,
+        billType: bill.billType! === 1 ? 'income' : 'expense',
+        categoryName:
+          CategoryOperations._rawDictionary[bill.categoryId!][0] ||
+          'Not Defined ',
+      };
+    });
+    return sanitize;
+  } catch (err) {
+    Toast('Error while getting record from database.');
   }
 };
 

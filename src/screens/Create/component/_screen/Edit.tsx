@@ -9,17 +9,18 @@ import {
   Alert,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import {useRecoilValue} from 'recoil';
+import {useRecoilCallback, useRecoilValue} from 'recoil';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {RouteProp} from '@react-navigation/native';
 import {MainStackScreenType} from '../../../../navigations/MainStack/types';
 import {TCategoryType} from '../../../../types';
-import {CategoriesAtom} from '../../../../State/Atoms';
+import {CategoriesAtom, UtilsAtom} from '../../../../State/Atoms';
 import {DayJs, Icons, Miscellaneous, Toast} from '../../../../utils';
 import RowItem from '../RowItem';
 import {GlobalStyle, Theme} from '../../../../theme&styles';
 import {Input, Modal, PressableButton} from '../../../../common';
 import {BillOperations} from '../../../../database';
+import {UseBannerAD} from '../../../../hooks';
 
 type Props = {
   route: RouteProp<MainStackScreenType, 'Create'>;
@@ -41,6 +42,11 @@ const CreateScreen = ({route}: Props) => {
   const [date, setDate] = React.useState(
     DayJs.dayjsDate(routeParam?.billDate!),
   );
+  const [premiumAndAdConsentState, setPremiumAndAdConsentState] =
+    React.useState<{premiumUser: boolean; adConsent: 0 | 1 | 2}>({
+      premiumUser: false,
+      adConsent: 0,
+    });
   const categoryFromRecoil = useRecoilValue(CategoriesAtom.AllCategories);
   const [openDatePicker, setOpenDatePicker] = React.useState(false);
   const [amount, setAmount] = React.useState(
@@ -126,6 +132,25 @@ const CreateScreen = ({route}: Props) => {
   const toggleModalToChoseCategory = () => {
     setToggleModal(prevState => !prevState);
   };
+  const getUserConsent = useRecoilCallback(
+    ({snapshot}) =>
+      () => {
+        const useConsent = snapshot.getLoadable(UtilsAtom.UserConsent).contents;
+        const premiumState = snapshot.getLoadable(
+          UtilsAtom.PremiumUser,
+        ).contents;
+
+        setPremiumAndAdConsentState({
+          adConsent: useConsent,
+          premiumUser: premiumState,
+        });
+      },
+    [],
+  );
+
+  React.useEffect(() => {
+    getUserConsent();
+  }, [getUserConsent]);
 
   return (
     <SafeAreaView style={styles.flex}>
@@ -215,6 +240,12 @@ const CreateScreen = ({route}: Props) => {
           data={Category(route.params.comingFrom, categoryFromRecoil)}
         />
       )}
+      <View style={styles.adContainer}>
+        <UseBannerAD
+          consentStatus={premiumAndAdConsentState.adConsent}
+          premiumUser={premiumAndAdConsentState.premiumUser}
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -245,6 +276,12 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
+  },
+  adContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });
 

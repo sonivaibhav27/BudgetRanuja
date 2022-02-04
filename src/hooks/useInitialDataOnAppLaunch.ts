@@ -10,7 +10,6 @@ import initializeAds from './Ads/initializeAds';
 import useAdsConsentHook from './Ads/useAdConsent';
 
 export default () => {
-  useAdsConsentHook();
   const [loading, setLoading] = React.useState(true);
   const setCurrentMonthBudgetInRecoil = useSetRecoilState(
     BudgetAtom.currentMonthBudget,
@@ -51,10 +50,11 @@ export default () => {
       setPremiumStatusOfUser(isPremium);
     } catch (err) {}
   };
-  const init = () => {
+  const init = async () => {
     getPreimumStatusOfUser();
     getDataFromDatabase();
   };
+  const isLoaded = useAdsConsentHook();
   React.useEffect(() => {
     // I18nManager.allowRTL(false);
     I18nManager.forceRTL(false);
@@ -66,6 +66,5 @@ export default () => {
     }
     //eslint-disable-next-line  react-hooks/exhaustive-deps
   }, []);
-
-  return loading;
+  return (loading || !isLoaded) && (!loading || isLoaded);
 };

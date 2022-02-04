@@ -116,6 +116,10 @@ export default ({navigation}: Props) => {
     setRestorePurchaseStarted(false);
   };
 
+  const navigateToGenerateReport = () => {
+    navigation.navigate('Report');
+  };
+
   return (
     <View style={styles.flex}>
       <ScrollView
@@ -127,12 +131,17 @@ export default ({navigation}: Props) => {
           <Icons.FontAwesome name="diamond" color="#FFF" size={20} />
           <Text style={styles.goPremiumText}>Go Premium</Text>
         </PressableButton>
-
+        <IconButton
+          text="Generate Report"
+          iconFamily="Foundation"
+          iconName="clipboard-notes"
+          onPress={navigateToGenerateReport}
+        />
         <SettingSection title="App settings">
           <>
             <IconButton
               onPress={() => toggleFullScreenModal('Currency')}
-              iconFamily="Fontisco"
+              iconFamily="Fontisto"
               iconName="dollar"
               text="Currency"
               showChevronRightIcon

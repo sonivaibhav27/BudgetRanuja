@@ -2,7 +2,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import React from 'react';
 import {StyleSheet, Text, View, Platform, Pressable} from 'react-native';
 import {MainStackScreenType} from '../../../navigations/MainStack/types';
-import {Icons, Miscellaneous, PopupMessage} from '../../../utils';
+import {Icons, Miscellaneous} from '../../../utils';
 
 interface CardProps {
   typeOfBill?: string;
@@ -18,25 +18,13 @@ interface CardProps {
 
 export default (props: CardProps) => {
   const navigateToDetailAboutOneCategory = () => {
-    PopupMessage(
-      '',
-      'This is premium feature, Watch ads to see the bill in detail',
-      () => {
-        props.loadAd();
-        props.selectedCardForAd.current = {
-          categoryName: props.billCategory!,
-          monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
-          billType: props.billType!,
-          currency: props.currency,
-        };
-        // setCurrentCategoryWatchedAd({
-        //   categoryName: props.billCategory!,
-        //   monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
-        //   billType: props.billType!,
-        //   currency: props.currency,
-        // });
-      },
-    );
+    props.loadAd();
+    props.selectedCardForAd.current = {
+      categoryName: props.billCategory!,
+      monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
+      billType: props.billType!,
+      currency: props.currency,
+    };
   };
 
   return (

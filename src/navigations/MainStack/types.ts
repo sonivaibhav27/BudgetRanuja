@@ -26,4 +26,5 @@ export type MainStackScreenType = {
     type?: 'New';
     categoryColor?: string;
   };
+  Report: undefined;
 };

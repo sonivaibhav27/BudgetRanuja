@@ -6,7 +6,6 @@ import {
   Text,
   I18nManager,
   Pressable,
-  TouchableOpacity,
 } from 'react-native';
 
 import MonthPicker, {ACTION_DATE_SET} from 'react-native-month-year-picker';
@@ -14,12 +13,11 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {useRecoilCallback, useSetRecoilState} from 'recoil';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {AuditSection, ActionButtons, DataSection} from './components';
-import {buildCSV, DayJs, Icons, PopupMessage, Toast} from '../../utils';
+import {DayJs, Icons, Toast} from '../../utils';
 import {BillOperations, BudgetOperations} from '../../database';
 import {BillsAtom, BudgetAtom, DetailState} from '../../State/Atoms';
 import {ActivityLoader} from '../../common';
-import {loadRewardAd} from '../../hooks';
-import {GoogleAdsTypes} from '@invertase/react-native-google-ads';
+import UseInterstitialAd from '../../hooks/Ads/UseInterestitial';
 
 type Props = {
   navigation: StackNavigationProp<MainStackScreenType, 'Detail'>;
@@ -44,9 +42,13 @@ const formateDateToGetMonthAndYear = (date: Date) => {
 };
 export default (_: Props) => {
   const {height} = useWindowDimensions();
-  const [loadAd, adEventHandler, rewardedInstance] = loadRewardAd();
-  //const [loadAd, isWatchedAd] = loadRewardAd();
-  const [generatingCsv, setGeneratingCsv] = React.useState(false);
+
+  const [
+    interstitialAdDismissed,
+    interstitialLoadAd,
+    intersitialShowAd,
+    DismissedInterestialAdCallback,
+  ] = UseInterstitialAd();
   const [loadingAd, setLoadingAd] = React.useState(false);
   const [dateToShowBillsFor, setDateToShowBillsFor] = React.useState(
     new Date(),
@@ -55,22 +57,18 @@ export default (_: Props) => {
   const toggleMonthPicker = () => {
     setMonthPickerVisible(!monthPickerVisible);
   };
-  const watchedAdRef = React.useRef<boolean>(false);
-  const watchAdFromWhichSource = React.useRef<
-    'Report' | 'Bill In Detail' | null
-  >(null);
 
   const setDetailAllBills = useSetRecoilState(DetailState.DetailAllBills);
   const setDetailBudget = useSetRecoilState(BudgetAtom.DetailBudgetAtom);
+
+  //const rewarded = React.useRef<GoogleAdsTypes.RewardedAd>();
   const currentCard = React.useRef<{
     categoryName: string;
     monthAndYearOfBillToShow: number;
     billType: string;
     currency: string;
   } | null>(null);
-  console.log('Detail screen loaded.');
-  const adsRewardedRef =
-    React.useRef<GoogleAdsTypes.RewardedAd>(rewardedInstance);
+
   const init = useRecoilCallback(
     ({snapshot}) =>
       () => {
@@ -86,110 +84,31 @@ export default (_: Props) => {
     [],
   );
 
-  const onGenerateReportButtonPressed = async () => {
-    PopupMessage(
-      '',
-      'This is premium feature, Watch ads to see the bill in detail',
-      () => {
-        watchAdFromWhichSource.current = 'Report';
-        setLoadingAd(true);
-        loadAd(adsRewardedRef.current!);
-      },
-    );
-  };
-
-  React.useEffect(() => {
-    console.log('Called From DEtail ');
-    _.navigation.setOptions({
-      headerRight: () => {
-        return (
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={onGenerateReportButtonPressed}
-            style={styles.exportToCSVContainer}>
-            <Text style={styles.exportToCSVText}> &#x25a6; Export as csv</Text>
-          </TouchableOpacity>
-        );
-      },
-    });
-
-    //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [_.navigation]);
-
   const _loadAd = () => {
     setLoadingAd(true);
-    console.log('Load AD', adsRewardedRef.current);
-    loadAd(adsRewardedRef.current!);
+    intersitialShowAd();
   };
 
   React.useEffect(() => {
-    // _.navigation.addListener('focus', () => {
-    //   adsRewardedRef.current = rewardedInstance;
-    let event: Function | undefined;
-    event = adEventHandler(
-      adsRewardedRef.current,
-      onSuccessRewardAdCallback,
-      () => {
-        setLoadingAd(false);
-      },
-      onAdClosed,
-      () => {
-        watchedAdRef.current = false;
-        watchAdFromWhichSource.current = null;
-      },
-    );
-
-    return () => event!();
-    // });
+    if (interstitialAdDismissed) {
+      interstitialLoadAd();
+      DismissedInterestialAdCallback();
+      setLoadingAd(false);
+      if (currentCard.current === null) {
+        Toast('Something went wrong. Please reload the app.');
+        return;
+      }
+      _.navigation.navigate('DetailAboutOneCategory', {
+        categoryName: currentCard.current?.categoryName!,
+        billType: currentCard.current?.billType! as 'income' | 'expense',
+        currency: currentCard.current?.currency!,
+        monthAndYearOfBillToShow:
+          currentCard.current?.monthAndYearOfBillToShow!,
+      });
+    }
     //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [interstitialAdDismissed]);
 
-  const onAdClosed = () => {
-    if (watchedAdRef.current) {
-      if (
-        watchAdFromWhichSource.current != null &&
-        watchAdFromWhichSource.current === 'Report'
-      ) {
-        _generateCSV();
-        watchedAdRef.current = false;
-        watchAdFromWhichSource.current = null;
-      } else {
-        watchedAdRef.current = false;
-        watchAdFromWhichSource.current = null;
-        if (currentCard.current === null) {
-          Toast('Something went wrong. Please reload the app.');
-          return;
-        }
-        _.navigation.navigate('DetailAboutOneCategory', {
-          categoryName: currentCard.current?.categoryName!,
-          billType: currentCard.current?.billType! as 'income' | 'expense',
-          currency: currentCard.current?.currency!,
-          monthAndYearOfBillToShow:
-            currentCard.current?.monthAndYearOfBillToShow!,
-        });
-      }
-    }
-  };
-  const onSuccessRewardAdCallback = () => {
-    watchedAdRef.current = true;
-  };
-
-  const _generateCSV = async () => {
-    setGeneratingCsv(true);
-    try {
-      const yearAndMonth = DayJs.getYearAndMonthFromDate(dateToShowBillsFor);
-      const billForCsv = await BillOperations.getBillsByDateInDetailForCSV(
-        yearAndMonth,
-      );
-      if (billForCsv) {
-        await buildCSV(billForCsv);
-      }
-    } catch (err) {
-      Toast('Failed to perform operation ' + err.message, 'LONG');
-    } finally {
-      setGeneratingCsv(false);
-    }
-  };
   React.useEffect(() => {
     init();
   }, [init]);
@@ -249,11 +168,7 @@ export default (_: Props) => {
           value={dateToShowBillsFor}
         />
       )}
-      {generatingCsv && (
-        <View style={styles.overlayCenter}>
-          <ActivityLoader loadingText="Generating Csv..." />
-        </View>
-      )}
+
       {loadingAd && (
         <View style={styles.overlayCenter}>
           <ActivityLoader loadingText="loading ad..." />
@@ -297,17 +212,7 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: '700',
   },
-  exportToCSVContainer: {
-    marginRight: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#008000',
-    padding: 8,
-    borderRadius: 100,
-  },
-  exportToCSVText: {
-    color: '#fff',
-  },
+
   overlayCenter: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',

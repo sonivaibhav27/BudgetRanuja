@@ -1,9 +1,14 @@
 import {Alert} from 'react-native';
 
-export default (title: string, message: string, onOkPress: () => void) => {
+export default (
+  title: string,
+  message: string,
+  onOkPress: () => void,
+  showCancel: boolean = true,
+) => {
   Alert.alert(title, message, [
     {
-      text: 'Cancel',
+      text: showCancel ? 'Cancel' : '',
     },
     {text: 'Ok', onPress: onOkPress},
   ]);

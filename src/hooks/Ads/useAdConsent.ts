@@ -6,18 +6,24 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import React from 'react';
+import {useSetRecoilState} from 'recoil';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
+import {UtilsAtom} from '../../State';
 
 type UserConsentStatus = 0 | 1 | 2 | null;
 
 const useAdsConsentHook = () => {
   const navigation =
     useNavigation<StackNavigationProp<MainStackScreenType, 'Create'>>();
-  const [userConsent, setUserConsent] = React.useState<UserConsentStatus>(null);
+  const setUserConsent = useSetRecoilState(UtilsAtom.UserConsent);
+  const [isLoaded, setLoaded] = React.useState(false);
   const consentFormInit = async () => {
     try {
       // '3F44BA187AF662C093736ABFE3CD1D46';
-      await AdsConsent.addTestDevices(['3EAEEE69510ACC7BE82166A9D097FC3D']);
+      await AdsConsent.addTestDevices([
+        '3EAEEE69510ACC7BE82166A9D097FC3D',
+        '05ADAA36163BF09902D81CCEC9FA322C',
+      ]);
       //Production emulator
       // await AdsConsent.addTestDevices(["0582F08BCC86D7B2E3B50E1B53A98478"]);
       await AdsConsent.setDebugGeography(AdsConsentDebugGeography.EEA);
@@ -27,19 +33,21 @@ const useAdsConsentHook = () => {
         'pub-2540765935808056',
       ]);
 
+      console.log({consentInfo});
       if (consentInfo.isRequestLocationInEeaOrUnknown) {
+        if (__DEV__) {
+          AdsConsent.setStatus(0);
+        }
         const getUserStatus = await AdsConsent.getStatus();
         if (getUserStatus === AdsConsentStatus.UNKNOWN) {
           const formResult = await AdsConsent.showForm({
             privacyPolicy: 'https://ranuja-apps.github.io/',
             withPersonalizedAds: true,
             withNonPersonalizedAds: true,
-            withAdFree: true,
+            withAdFree: false,
           });
           if (formResult.userPrefersAdFree) {
-            navigation.navigate('Pricing', {
-              cameFromConsentForm: true,
-            });
+            navigation.navigate('Pricing', {version: 'a'});
           }
           if (
             formResult.status === AdsConsentStatus.PERSONALIZED ||
@@ -55,13 +63,18 @@ const useAdsConsentHook = () => {
       } else {
         setUserConsent(AdsConsentStatus.PERSONALIZED);
       }
-    } catch (err) {}
+    } catch (err) {
+    } finally {
+      console.log('finally called.');
+      setLoaded(true);
+    }
   };
 
   React.useEffect(() => {
     consentFormInit();
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  return [userConsent, AdsConsentStatus];
+  return isLoaded;
 };
 
 export default useAdsConsentHook;

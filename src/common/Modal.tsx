@@ -9,19 +9,18 @@ import {
   Dimensions,
   BackHandler,
 } from 'react-native';
-import {CategoryType} from '../database/Types';
+import {TCategoryType} from '../types';
 import PressableButton from './PressableButton';
 
 const height = Dimensions.get('window').height;
 
 type Props = {
-  data: CategoryType[];
-  onItemSelect: (item: CategoryType) => void;
+  data: TCategoryType[];
+  onItemSelect: (item: TCategoryType) => void;
   closeModal: () => void;
 };
 
 export default ({data, onItemSelect, closeModal}: Props) => {
-  console.log({data});
   const animRef = React.useRef(new Animated.Value(0)).current;
   React.useEffect(() => {
     Animated.timing(animRef, {
@@ -39,9 +38,10 @@ export default ({data, onItemSelect, closeModal}: Props) => {
     );
 
     return () => backHandler.remove();
-  }, [animRef, closeModal]);
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animRef]);
 
-  const _onItemSelect = (item: CategoryType) => {
+  const _onItemSelect = (item: TCategoryType) => {
     Animated.timing(animRef, {
       toValue: 0,
       duration: 200,
@@ -52,7 +52,7 @@ export default ({data, onItemSelect, closeModal}: Props) => {
       closeModal();
     });
   };
-  const renderItem = ({item}: {item: CategoryType}) => {
+  const renderItem = ({item}: {item: TCategoryType}) => {
     return (
       <View>
         <PressableButton
@@ -110,7 +110,11 @@ export default ({data, onItemSelect, closeModal}: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFill,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    left: 0,
+    bottom: 0,
     justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.1)',
     paddingHorizontal: 20,
