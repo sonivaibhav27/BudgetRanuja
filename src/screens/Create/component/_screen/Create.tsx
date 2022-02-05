@@ -8,7 +8,7 @@ import {
   TextInput,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import {useRecoilValue, useSetRecoilState} from 'recoil';
+import {useRecoilCallback, useRecoilValue, useSetRecoilState} from 'recoil';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {RouteProp} from '@react-navigation/native';
 import {MainStackScreenType} from '../../../../navigations/MainStack/types';
@@ -20,6 +20,7 @@ import RowItem from '../RowItem';
 import {GlobalStyle} from '../../../../theme&styles';
 import {Input, Modal, PressableButton} from '../../../../common';
 import CheckBox from '../CheckBox';
+import {UseBannerAD} from '../../../../hooks';
 
 type Props = {
   route: RouteProp<MainStackScreenType, 'Create'>;
@@ -41,6 +42,11 @@ const CreateScreen = ({route}: Props) => {
   const [openDatePicker, setOpenDatePicker] = React.useState(false);
   const [amount, setAmount] = React.useState('');
   const [remark, setRemark] = React.useState('');
+  const [premiumAndAdConsentState, setPremiumAndAdConsentState] =
+    React.useState<{premiumUser: boolean; adConsent: 0 | 1 | 2}>({
+      premiumUser: false,
+      adConsent: 0,
+    });
   const [category, setCategory] = React.useState(
     Category(route.params.comingFrom, categoryFromRecoil)[0]!,
   );
@@ -63,11 +69,30 @@ const CreateScreen = ({route}: Props) => {
     }
   };
 
+  const getUserConsent = useRecoilCallback(
+    ({snapshot}) =>
+      () => {
+        const useConsent = snapshot.getLoadable(UtilsAtom.UserConsent).contents;
+        const premiumState = snapshot.getLoadable(
+          UtilsAtom.PremiumUser,
+        ).contents;
+
+        setPremiumAndAdConsentState({
+          adConsent: useConsent,
+          premiumUser: premiumState,
+        });
+      },
+    [],
+  );
   const call = () => {
     if (remarkTextInputRef.current) {
       remarkTextInputRef.current.focus();
     }
   };
+
+  React.useEffect(() => {
+    getUserConsent();
+  }, [getUserConsent]);
 
   const _createBill = async () => {
     try {
@@ -197,6 +222,12 @@ const CreateScreen = ({route}: Props) => {
           data={Category(route.params.comingFrom, categoryFromRecoil)}
         />
       )}
+      <View style={styles.adContainer}>
+        <UseBannerAD
+          consentStatus={premiumAndAdConsentState.adConsent}
+          premiumUser={premiumAndAdConsentState.premiumUser}
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -221,6 +252,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  adContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });
 

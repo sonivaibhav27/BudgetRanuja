@@ -1,4 +1,8 @@
 {
   "name": "ranujaBudget",
-  "displayName": "ranujaBudget"
+  "displayName": "ranujaBudget",
+  "react-native-google-ads":{
+    "android_app_id":"ca-app-pub-2540765935808056~5423865882",
+    "delay_app_measurement_init": true
+  }
 }

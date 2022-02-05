@@ -6,7 +6,6 @@ import {
   Text,
   I18nManager,
   Pressable,
-  TouchableOpacity,
 } from 'react-native';
 
 import MonthPicker, {ACTION_DATE_SET} from 'react-native-month-year-picker';
@@ -14,10 +13,11 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {useRecoilCallback, useSetRecoilState} from 'recoil';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {AuditSection, ActionButtons, DataSection} from './components';
-import {buildCSV, DayJs, Icons, Toast} from '../../utils';
+import {DayJs, Icons, Toast} from '../../utils';
 import {BillOperations, BudgetOperations} from '../../database';
 import {BillsAtom, BudgetAtom, DetailState} from '../../State/Atoms';
 import {ActivityLoader} from '../../common';
+import UseInterstitialAd from '../../hooks/Ads/UseInterestitial';
 
 type Props = {
   navigation: StackNavigationProp<MainStackScreenType, 'Detail'>;
@@ -42,7 +42,14 @@ const formateDateToGetMonthAndYear = (date: Date) => {
 };
 export default (_: Props) => {
   const {height} = useWindowDimensions();
-  const [generatingCsv, setGeneratingCsv] = React.useState(false);
+
+  const [
+    interstitialAdDismissed,
+    interstitialLoadAd,
+    intersitialShowAd,
+    DismissedInterestialAdCallback,
+  ] = UseInterstitialAd();
+  const [loadingAd, setLoadingAd] = React.useState(false);
   const [dateToShowBillsFor, setDateToShowBillsFor] = React.useState(
     new Date(),
   );
@@ -53,6 +60,15 @@ export default (_: Props) => {
 
   const setDetailAllBills = useSetRecoilState(DetailState.DetailAllBills);
   const setDetailBudget = useSetRecoilState(BudgetAtom.DetailBudgetAtom);
+
+  //const rewarded = React.useRef<GoogleAdsTypes.RewardedAd>();
+  const currentCard = React.useRef<{
+    categoryName: string;
+    monthAndYearOfBillToShow: number;
+    billType: string;
+    currency: string;
+  } | null>(null);
+
   const init = useRecoilCallback(
     ({snapshot}) =>
       () => {
@@ -68,42 +84,35 @@ export default (_: Props) => {
     [],
   );
 
-  const onGenerateReportButtonPressed = async () => {
-    setGeneratingCsv(true);
-    try {
-      const yearAndMonth = DayJs.getYearAndMonthFromDate(dateToShowBillsFor);
-      const billForCsv = await BillOperations.getBillsByDateInDetailForCSV(
-        yearAndMonth,
-      );
-      if (billForCsv) {
-        await buildCSV(billForCsv);
-      }
-    } catch (err) {
-      Toast('Failed to perform operation ' + err.message, 'LONG');
-    } finally {
-      setGeneratingCsv(false);
-    }
+  const _loadAd = () => {
+    setLoadingAd(true);
+    intersitialShowAd();
   };
 
   React.useEffect(() => {
-    _.navigation.setOptions({
-      headerRight: () => {
-        return (
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={onGenerateReportButtonPressed}
-            style={styles.exportToCSVContainer}>
-            <Text style={styles.exportToCSVText}> &#x25a6; Export as csv</Text>
-          </TouchableOpacity>
-        );
-      },
-    });
+    if (interstitialAdDismissed) {
+      interstitialLoadAd();
+      DismissedInterestialAdCallback();
+      setLoadingAd(false);
+      if (currentCard.current === null) {
+        Toast('Something went wrong. Please reload the app.');
+        return;
+      }
+      _.navigation.navigate('DetailAboutOneCategory', {
+        categoryName: currentCard.current?.categoryName!,
+        billType: currentCard.current?.billType! as 'income' | 'expense',
+        currency: currentCard.current?.currency!,
+        monthAndYearOfBillToShow:
+          currentCard.current?.monthAndYearOfBillToShow!,
+      });
+    }
     //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [interstitialAdDismissed]);
 
   React.useEffect(() => {
     init();
   }, [init]);
+
   const callMonthPickerFunction = async (event: string, newDate: Date) => {
     console.log({newDate});
     switch (event) {
@@ -141,6 +150,8 @@ export default (_: Props) => {
       </View>
       <View style={styles.dataContainer}>
         <DataSection
+          selectedCardForAd={currentCard}
+          loadAd={_loadAd}
           monthAndYearOfBillToShow={DayJs.getYearAndMonthFromDate(
             dateToShowBillsFor,
           )}
@@ -157,9 +168,10 @@ export default (_: Props) => {
           value={dateToShowBillsFor}
         />
       )}
-      {generatingCsv && (
+
+      {loadingAd && (
         <View style={styles.overlayCenter}>
-          <ActivityLoader loadingText="Generating Csv..." />
+          <ActivityLoader loadingText="loading ad..." />
         </View>
       )}
     </View>
@@ -200,17 +212,7 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: '700',
   },
-  exportToCSVContainer: {
-    marginRight: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#008000',
-    padding: 8,
-    borderRadius: 100,
-  },
-  exportToCSVText: {
-    color: '#fff',
-  },
+
   overlayCenter: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',

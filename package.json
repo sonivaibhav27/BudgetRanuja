@@ -13,6 +13,7 @@
     "uploadSourceFile": "node_modules/@sentry/cli/bin/sentry-cli releases --org ranuja --project . files com.budjet@1.0beta upload-sourcemaps  --dist 1 --strip-prefix . --rewrite index.android.bundle index.android.bundle.map"
   },
   "dependencies": {
+    "@invertase/react-native-google-ads": "^3.4.0",
     "@nozbe/watermelondb": "^0.24.0",
     "@react-native-community/datetimepicker": "^3.5.2",
     "@react-navigation/native": "^6.0.6",

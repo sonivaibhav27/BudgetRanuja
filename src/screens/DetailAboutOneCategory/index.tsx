@@ -1,12 +1,12 @@
 import {StackScreenProps} from '@react-navigation/stack';
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import {ActivityLoader, PressableButton} from '../../common';
 import {BillOperations} from '../../database';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {Theme} from '../../theme&styles';
-import {ExtraDetailTypes, TCSVBills} from '../../types';
-import {buildCSV, Miscellaneous, Toast} from '../../utils';
+import {ExtraDetailTypes} from '../../types';
+import {Miscellaneous, Toast} from '../../utils';
 import {ListOfBills, TotalSection} from './components';
 
 type Props = StackScreenProps<MainStackScreenType, 'DetailAboutOneCategory'>;
@@ -20,39 +20,12 @@ export default (props: Props) => {
   const [totalAmount, setTotalAmount] = React.useState(0);
 
   React.useEffect(() => {
-    props.navigation.setOptions({
-      headerRight: () => {
-        return (
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={onGenerateReportButtonPressed}
-            style={styles.exportToCSVContainer}>
-            <Text style={styles.exportToCSVText}> &#x25a6; Export as csv</Text>
-          </TouchableOpacity>
-        );
-      },
-    });
-    //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categoryData, props.navigation]);
-  React.useEffect(() => {
     getAllDataForOneCategory();
-
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onGenerateReportButtonPressed = async () => {
-    if (categoryData.length > 0) {
-      const csv: TCSVBills[] = categoryData.map(item => {
-        return {
-          ...item,
-          categoryName: props.route.params.categoryName,
-          billType: props.route.params.billType as 'expense' | 'income',
-        };
-      });
-      await buildCSV(csv, true);
-    }
-  };
   const getAllDataForOneCategory = async () => {
+    console.log(props.route.params);
     setLoading(true);
     setError(null);
     try {
@@ -136,17 +109,5 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: 20,
     flex: 1,
-  },
-
-  exportToCSVContainer: {
-    marginRight: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#008000',
-    padding: 10,
-    borderRadius: 100,
-  },
-  exportToCSVText: {
-    color: '#fff',
   },
 });

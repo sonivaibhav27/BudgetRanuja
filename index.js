@@ -15,6 +15,7 @@ import {DatabaseConfig, Keys} from './src/config';
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 import {Database} from '@nozbe/watermelondb';
 import migrations from './src/database/_init/migrations';
+import {QonversionManager} from './src/utils';
 
 Sentry.init({
   dsn: Keys.REMOTE_LOGGER_KEY,
@@ -22,6 +23,7 @@ Sentry.init({
   environment: __DEV__ ? 'development' : 'production',
 });
 
+QonversionManager.launchQonversionSDK();
 const adapter = new SQLiteAdapter({
   schema: Schema,
   jsi: false,

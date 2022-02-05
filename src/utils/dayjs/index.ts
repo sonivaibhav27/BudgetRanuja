@@ -38,6 +38,9 @@ class Dayjs {
       Number(`${date.getFullYear()}${monthSanitize}`)
     );
   }
+  static formatDate(date: Date, sep: '/' | '-') {
+    return dayjs(date).format(`DD${sep}MM${sep}YYYY`);
+  }
 }
 
 export default Dayjs;

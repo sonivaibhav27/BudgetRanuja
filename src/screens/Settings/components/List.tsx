@@ -28,20 +28,7 @@ export default (props: Props) => {
     };
     init();
   }, []);
-  React.useEffect(() => {
-    const navigation = props.navigation.addListener('focus', () => {
-      const init = async () => {
-        const currency = await CurrencyOperations.getCurrency();
-        console.log({currency});
-        setSelectedCurrencySymbol(currency?.symbol);
-        setSelectedCurrencyName(currency?.name);
-      };
 
-      init();
-    });
-
-    return () => navigation();
-  }, [props.navigation]);
   const _onItemSelect = async (name: string, symbol: string) => {
     props.onItemSelect(name, symbol);
     setSelectedCurrencySymbol(symbol);
@@ -122,6 +109,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginHorizontal: 20,
+    alignItems: 'center',
   },
   symbol: {
     fontSize: 18,
@@ -146,12 +134,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    borderColor: '#333',
   },
   selectedRadio: {
-    width: 10,
-    height: 10,
-    borderRadius: 9,
+    width: 9,
+    height: 9,
+    borderRadius: 10,
     backgroundColor: Theme.ColorsTheme.primary,
-    alignSelf: 'center',
+    // alignSelf: 'center',
   },
 });

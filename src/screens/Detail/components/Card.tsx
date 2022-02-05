@@ -12,19 +12,21 @@ interface CardProps {
   monthAndYearOfBillToShow: number;
   billType?: 'income' | 'expense';
   currency: string;
+  loadAd: () => void;
+  selectedCardForAd: any;
 }
 
 export default (props: CardProps) => {
   const navigateToDetailAboutOneCategory = () => {
-    if (props.billCategory?.length) {
-      props.navigation.navigate('DetailAboutOneCategory', {
-        categoryName: props.billCategory,
-        monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
-        billType: props.billType!,
-        currency: props.currency,
-      });
-    }
+    props.loadAd();
+    props.selectedCardForAd.current = {
+      categoryName: props.billCategory!,
+      monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
+      billType: props.billType!,
+      currency: props.currency,
+    };
   };
+
   return (
     <View style={styles.outerContainer}>
       <Pressable

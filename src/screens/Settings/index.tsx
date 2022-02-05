@@ -10,13 +10,13 @@ import {
   NativeModules,
 } from 'react-native';
 import {useSetRecoilState} from 'recoil';
-import {FullScreenModal, PressableButton} from '../../common';
+import {ActivityLoader, FullScreenModal, PressableButton} from '../../common';
 import {CurrencyCategories} from '../../data';
 import {CurrencyOperations} from '../../database';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {UtilsAtom} from '../../State';
 import {ColorsTheme} from '../../theme&styles/theme';
-import {Icons, Logger, Toast} from '../../utils';
+import {Icons, Logger, QonversionManager, Toast} from '../../utils';
 import {
   IconButton,
   SettingSection,
@@ -55,6 +55,8 @@ export default ({navigation}: Props) => {
   const [selectModalText, setSelectModalText] = React.useState<
     'Currency' | 'Categories' | 'Delete Bills' | null
   >(null);
+  const [restorePurchaseStarted, setRestorePurchaseStarted] =
+    React.useState(false);
 
   const setCurrency = useSetRecoilState(UtilsAtom.Currency);
 
@@ -108,6 +110,16 @@ export default ({navigation}: Props) => {
     setCurrency(symbol);
   };
 
+  const restorePurchase = async () => {
+    setRestorePurchaseStarted(true);
+    await QonversionManager.restorePurchase();
+    setRestorePurchaseStarted(false);
+  };
+
+  const navigateToGenerateReport = () => {
+    navigation.navigate('Report');
+  };
+
   return (
     <View style={styles.flex}>
       <ScrollView
@@ -119,12 +131,17 @@ export default ({navigation}: Props) => {
           <Icons.FontAwesome name="diamond" color="#FFF" size={20} />
           <Text style={styles.goPremiumText}>Go Premium</Text>
         </PressableButton>
-
+        <IconButton
+          text="Generate Report"
+          iconFamily="Foundation"
+          iconName="clipboard-notes"
+          onPress={navigateToGenerateReport}
+        />
         <SettingSection title="App settings">
           <>
             <IconButton
               onPress={() => toggleFullScreenModal('Currency')}
-              iconFamily="Fontisco"
+              iconFamily="Fontisto"
               iconName="dollar"
               text="Currency"
               showChevronRightIcon
@@ -146,6 +163,11 @@ export default ({navigation}: Props) => {
         </SettingSection>
         <SettingSection title="Other settings">
           <>
+            <IconButton
+              onPress={restorePurchase}
+              iconName="lock"
+              text="Restore Purchase"
+            />
             <IconButton
               onPress={sendMail}
               iconName="mail"
@@ -192,6 +214,12 @@ export default ({navigation}: Props) => {
           )}
         </FullScreenModal>
       )}
+
+      {restorePurchaseStarted && (
+        <View style={styles.overlay}>
+          <ActivityLoader loadingText="loading..." />
+        </View>
+      )}
     </View>
   );
 };
@@ -233,5 +261,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '400',
     letterSpacing: 1.1,
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

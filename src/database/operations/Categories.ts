@@ -94,6 +94,7 @@ class Category {
     categoryName: string,
     type: 'expense' | 'income',
     color: string,
+    isPremiumUser: boolean = false,
   ) {
     if (categoryName.length === 0) {
       Toast("Can't save empty category name.", 'SHORT');
@@ -104,7 +105,7 @@ class Category {
       .query()
       .fetchCount();
 
-    if (prevCategoryLength >= MAX_CATERGORY_ALLOWED) {
+    if (!isPremiumUser && prevCategoryLength >= MAX_CATERGORY_ALLOWED) {
       Toast(`Total Categories allowed are ${MAX_CATERGORY_ALLOWED}`);
       return;
     }

@@ -11,28 +11,31 @@ type Props = {
     | 'dollar'
     | 'circle-with-plus'
     | 'mail'
-    | 'delete';
+    | 'delete'
+    | 'lock'
+    | 'clipboard-notes';
   showChevronRightIcon?: boolean;
-  iconFamily: 'Entypo' | 'Fontisco' | 'AntDesign';
+  iconFamily: 'Entypo' | 'Fontisto' | 'AntDesign' | 'Foundation';
   onPress: () => void;
 };
 
+const getIconFamily = (iconFamily: Props['iconFamily']) => {
+  return Icons[iconFamily];
+};
+
 const IconButton = (props: Props) => {
-  const Icon =
-    props.iconFamily === 'Entypo'
-      ? Icons.Entypo
-      : props.iconFamily === 'Fontisco'
-      ? Icons.Fontisto
-      : Icons.AntDesign;
+  const Icon = getIconFamily(props.iconFamily);
   return (
     <PressableButton onPress={props.onPress} style={styles.container}>
-      <View style={styles.iconAndTextContainer}>
-        <Icon name={props.iconName} size={25} color="#000" />
-        <Text style={styles.textStyle}>{props.text}</Text>
-      </View>
-      {props.showChevronRightIcon && (
-        <Icons.Entypo name={'chevron-right'} size={25} color="#000" />
-      )}
+      <>
+        <View style={styles.iconAndTextContainer}>
+          <Icon name={props.iconName} size={25} color="#000" />
+          <Text style={styles.textStyle}>{props.text}</Text>
+        </View>
+        {props.showChevronRightIcon && (
+          <Icons.Entypo name={'chevron-right'} size={25} color="#000" />
+        )}
+      </>
     </PressableButton>
   );
 };

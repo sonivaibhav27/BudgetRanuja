@@ -11,6 +11,7 @@ import {
   PieChartScreen,
   EditCategoryScreen,
   SplashScreen,
+  ReportScreen,
 } from '../../screens';
 import {useWindowDimensions} from 'react-native';
 import {useInitialDataOnAppLaunch} from '../../hooks';
@@ -25,7 +26,6 @@ export default () => {
 
   return (
     <Stack.Navigator
-      // initialRouteName="PieChart"j
       screenOptions={{
         headerTitleStyle: {
           left: -15,
@@ -73,17 +73,21 @@ export default () => {
           };
         }}
       />
-      <Stack.Screen name="Pricing" component={PricingScreen} />
+      <Stack.Group screenOptions={{presentation: 'modal', headerShown: false}}>
+        <Stack.Screen name="Pricing" component={PricingScreen} />
+      </Stack.Group>
       <Stack.Screen
         name="PieChart"
         options={{headerTitle: 'Graph'}}
         component={PieChartScreen}
       />
+
       <Stack.Screen
         options={{title: 'Add/Edit'}}
         name="EditCategory"
         component={EditCategoryScreen}
       />
+      <Stack.Screen name="Report" component={ReportScreen} />
     </Stack.Navigator>
   );
 };

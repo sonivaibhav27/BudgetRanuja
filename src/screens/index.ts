@@ -7,3 +7,4 @@ export {default as PricingScreen} from './Pricing';
 export {default as PieChartScreen} from './PieChart';
 export {default as EditCategoryScreen} from './EditCategories';
 export {default as SplashScreen} from './Splash';
+export {default as ReportScreen} from './Reports';
