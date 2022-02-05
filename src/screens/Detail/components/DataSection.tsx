@@ -3,6 +3,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import React from 'react';
 import {FlatList} from 'react-native';
 import {
+  useRecoilCallback,
   useRecoilRefresher_UNSTABLE,
   useRecoilValue,
   useSetRecoilState,
@@ -22,10 +23,16 @@ export default (props: Props) => {
   const setSelectedType = useSetRecoilState(DetailState.selectedType);
   const bills = useRecoilValue(DetailState.DetailDataBasedOnSelectedType);
   const currency = useRecoilValue(UtilsAtom.Currency);
+  const [premium, setPremium] = React.useState(false);
   useRecoilRefresher_UNSTABLE(DetailState.DetailDataBasedOnSelectedType);
 
+  const getDataFromRecoil = useRecoilCallback(({snapshot}) => () => {
+    const isPremium = snapshot.getLoadable(UtilsAtom.PremiumUser).contents;
+    setPremium(isPremium);
+  });
   React.useEffect(() => {
     setSelectedType('expense');
+    getDataFromRecoil();
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -40,6 +47,7 @@ export default (props: Props) => {
       renderItem={({item}) => {
         return (
           <Card
+            isPremium={premium}
             selectedCardForAd={props.selectedCardForAd}
             loadAd={props.loadAd}
             currency={currency}

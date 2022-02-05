@@ -14,17 +14,27 @@ interface CardProps {
   currency: string;
   loadAd: () => void;
   selectedCardForAd: any;
+  isPremium: boolean;
 }
 
 export default (props: CardProps) => {
   const navigateToDetailAboutOneCategory = () => {
-    props.loadAd();
-    props.selectedCardForAd.current = {
-      categoryName: props.billCategory!,
-      monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
-      billType: props.billType!,
-      currency: props.currency,
-    };
+    if (props.isPremium) {
+      props.navigation.navigate('DetailAboutOneCategory', {
+        categoryName: props.billCategory!,
+        monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
+        billType: props.billType!,
+        currency: props.currency,
+      });
+    } else {
+      props.loadAd();
+      props.selectedCardForAd.current = {
+        categoryName: props.billCategory!,
+        monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
+        billType: props.billType!,
+        currency: props.currency,
+      };
+    }
   };
 
   return (

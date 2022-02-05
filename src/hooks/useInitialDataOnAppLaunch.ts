@@ -47,7 +47,9 @@ export default () => {
   const getPreimumStatusOfUser = async () => {
     try {
       const isPremium = await QonversionManager.getActivePermission();
-      setPremiumStatusOfUser(isPremium);
+      if (isPremium) {
+        setPremiumStatusOfUser(isPremium);
+      }
     } catch (err) {}
   };
   const init = async () => {
