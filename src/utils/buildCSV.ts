@@ -27,9 +27,9 @@ const checkPermission = async () => {
 const getFileName = (fileName: string) => {
   return (
     DownloadDirectoryPath +
-    `/${fileName}-${new Date().getUTCMilliseconds()}${(
+    `/Budjet-${fileName} ${DayJs.getTodayDateAndTime()}${(
       Math.random() * 1000
-    ).toFixed(0)}-budjet.csv`
+    ).toFixed(0)}.csv`
   );
 };
 export default async (data: TCSVBills[], fileNameByCategory?: boolean) => {

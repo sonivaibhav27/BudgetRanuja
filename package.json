@@ -9,6 +9,7 @@
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "clean": "cd android && ./gradlew clean && cd ..",
+    "codepush":"appcenter codepush release-react -a vidowndownload-gmail.com/Budjet -m -d Production --target-binary-version \"1.3.0-dev\"  --description \" Banner Ad on Keyboard open, and csv was not downloading, and solved interestial ads \"",
     "makeSourceFile": "react-native bundle  --dev false  --platform android --entry-file index.js  --bundle-output index.android.bundle  --sourcemap-output index.android.bundle.map",
     "uploadSourceFile": "node_modules/@sentry/cli/bin/sentry-cli releases --org ranuja --project . files com.budjet@1.0beta upload-sourcemaps  --dist 1 --strip-prefix . --rewrite index.android.bundle index.android.bundle.map"
   },

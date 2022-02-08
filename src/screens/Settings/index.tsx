@@ -9,7 +9,7 @@ import {
   View,
   NativeModules,
 } from 'react-native';
-import {useSetRecoilState} from 'recoil';
+import {useRecoilCallback, useSetRecoilState} from 'recoil';
 import {ActivityLoader, FullScreenModal, PressableButton} from '../../common';
 import {CurrencyCategories} from '../../data';
 import {CurrencyOperations} from '../../database';
@@ -52,6 +52,7 @@ interface Props {
 export default ({navigation}: Props) => {
   const [openFullScreenModal, setOpenFullScreenModal] = React.useState(false);
   const [appVersion, setAppVerion] = React.useState<string | null>(null);
+  const [premiumUser, setPremiumUser] = React.useState(false);
   const [selectModalText, setSelectModalText] = React.useState<
     'Currency' | 'Categories' | 'Delete Bills' | null
   >(null);
@@ -120,17 +121,28 @@ export default ({navigation}: Props) => {
     navigation.navigate('Report');
   };
 
+  const getDataFromRecoil = useRecoilCallback(({snapshot}) => () => {
+    const s = snapshot.getLoadable(UtilsAtom.PremiumUser).contents;
+    setPremiumUser(s);
+  });
+
+  React.useEffect(() => {
+    getDataFromRecoil();
+  }, [getDataFromRecoil]);
+
   return (
     <View style={styles.flex}>
       <ScrollView
         contentContainerStyle={styles.contentContainerStyle}
         style={styles.container}>
-        <PressableButton
-          onPress={onPremiumClick}
-          style={styles.goPremiumContainer}>
-          <Icons.FontAwesome name="diamond" color="#FFF" size={20} />
-          <Text style={styles.goPremiumText}>Go Premium</Text>
-        </PressableButton>
+        {!premiumUser && (
+          <PressableButton
+            onPress={onPremiumClick}
+            style={styles.goPremiumContainer}>
+            <Icons.FontAwesome name="diamond" color="#FFF" size={20} />
+            <Text style={styles.goPremiumText}>Go Premium</Text>
+          </PressableButton>
+        )}
         <IconButton
           text="Generate Report"
           iconFamily="Foundation"

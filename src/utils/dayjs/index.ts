@@ -41,6 +41,10 @@ class Dayjs {
   static formatDate(date: Date, sep: '/' | '-') {
     return dayjs(date).format(`DD${sep}MM${sep}YYYY`);
   }
+  static getTodayDateAndTime() {
+    const date = new Date();
+    return `${date.getDate()} ${date.getHours()}${date.getMinutes()}${date.getSeconds()}${date.getMilliseconds()}`;
+  }
 }
 
 export default Dayjs;

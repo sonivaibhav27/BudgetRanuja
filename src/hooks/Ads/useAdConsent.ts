@@ -71,7 +71,13 @@ const useAdsConsentHook = () => {
   };
 
   React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      setLoaded(true);
+      setUserConsent(AdsConsentStatus.NON_PERSONALIZED);
+    }, 10000);
     consentFormInit();
+
+    return () => clearTimeout(timeout);
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return isLoaded;

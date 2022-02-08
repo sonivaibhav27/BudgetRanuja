@@ -48,7 +48,7 @@ export default () => {
     try {
       const isPremium = await QonversionManager.getActivePermission();
       if (isPremium) {
-        setPremiumStatusOfUser(isPremium);
+        setPremiumStatusOfUser(false);
       }
     } catch (err) {}
   };
@@ -68,5 +68,5 @@ export default () => {
     }
     //eslint-disable-next-line  react-hooks/exhaustive-deps
   }, []);
-  return (loading || !isLoaded) && (!loading || isLoaded);
+  return loading || !isLoaded;
 };

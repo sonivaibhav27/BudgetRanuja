@@ -8,9 +8,9 @@ import Toast from './Toast';
 class QonversionManager {
   static permissionId = 'Premium';
 
-  static launchQonversionSDK() {
+  static async launchQonversionSDK() {
     try {
-      Qonversion.launchWithKey(Keys.PURCHASE_SDK_KEY, false);
+      await Qonversion.launchWithKey(Keys.PURCHASE_SDK_KEY, false);
     } catch (err) {}
   }
   /**

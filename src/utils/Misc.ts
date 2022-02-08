@@ -1,5 +1,8 @@
+import {Linking, PermissionsAndroid} from 'react-native';
+import {PopupMessage} from '.';
 import {CategoryOperations} from '../database';
 import {TBillDetail} from '../types';
+import Toast from './Toast';
 
 class ApplicationError extends Error {
   constructor(name: string, message?: string) {
@@ -47,7 +50,7 @@ export const ValidateBill = (bill: TBillDetail, billAmount: string) => {
       'Please check Category and amount input.',
     );
   }
-  if (!/^[-]?\d*(\.\d{0,2})?$/.test(billAmount)) {
+  if (!/^\d*(\.\d{0,2})?$/.test(billAmount)) {
     throw new ApplicationError(
       'ApplicationError',
       'Amount should be of type number only and Only 2 Decimal are allowed.',
@@ -79,4 +82,35 @@ export const formatIntoCurrency = (amount: number) => {
   // $&  is reference to the matched section
   // ?= is followed by , here bottom 1 digit followed by 3 digit
   return amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+};
+
+export const checkOrRequestStoragePermission = async () => {
+  const permission = await PermissionsAndroid.check(
+    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+  );
+  console.log({permission});
+  if (!permission) {
+    console.log('inside');
+    const response = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+    );
+    if (response === 'granted') {
+      return true;
+    } else if (response === 'denied') {
+      Toast('Need Permission to download file.', 'LONG');
+      return false;
+    } else {
+      PopupMessage(
+        'Storage Permission',
+        'Need storage permission to download the file,Open Settings',
+        () => {
+          try {
+            Linking.openSettings();
+          } catch (err) {}
+        },
+      );
+      return false;
+    }
+  }
+  return true;
 };

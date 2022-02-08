@@ -27,13 +27,13 @@ export default (props: CardProps) => {
         currency: props.currency,
       });
     } else {
-      props.loadAd();
       props.selectedCardForAd.current = {
         categoryName: props.billCategory!,
         monthAndYearOfBillToShow: props.monthAndYearOfBillToShow,
         billType: props.billType!,
         currency: props.currency,
       };
+      props.loadAd();
     }
   };
 

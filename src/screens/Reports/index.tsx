@@ -5,7 +5,7 @@ import MonthPicker, {ACTION_DATE_SET} from 'react-native-month-year-picker';
 import {TCategoryType} from '../../types';
 import {useRecoilCallback} from 'recoil';
 import {CategoriesAtom, UtilsAtom} from '../../State/Atoms';
-import {buildCSV, DayJs, PopupMessage} from '../../utils';
+import {buildCSV, DayJs, Miscellaneous, PopupMessage} from '../../utils';
 import {GlobalStyle} from '../../theme&styles';
 import {BillOperations} from '../../database';
 import UseRewardAd from '../../hooks/Ads/RewardAdNew';
@@ -68,29 +68,34 @@ export default () => {
   };
 
   const GenerateCSV = async () => {
-    if (typeof monthAndYear === 'undefined') {
-      PopupMessage(
-        '',
-        'Select Month and Year to generate report.',
-        () => {},
-        false,
-      );
-      return;
-    }
-    if (monthAndYear) {
-      if (!premiumState) {
-        PopupMessage(
-          '',
-          'This is premium feature, watch ad to download',
-          () => {
-            setLoadingAd(true);
-            loadAd();
-          },
-        );
-      } else {
-        _generateCsv();
+    try {
+      const granted = await Miscellaneous.checkOrRequestStoragePermission();
+      if (granted) {
+        if (typeof monthAndYear === 'undefined') {
+          PopupMessage(
+            '',
+            'Select Month and Year to generate report.',
+            () => {},
+            false,
+          );
+          return;
+        }
+        if (monthAndYear) {
+          if (!premiumState) {
+            PopupMessage(
+              '',
+              'This is premium feature, watch ad to download',
+              () => {
+                setLoadingAd(true);
+                loadAd();
+              },
+            );
+          } else {
+            _generateCsv();
+          }
+        }
       }
-    }
+    } catch (err) {}
   };
 
   const _generateCsv = async () => {

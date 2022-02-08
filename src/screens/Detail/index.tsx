@@ -86,7 +86,17 @@ export default (_: Props) => {
 
   const _loadAd = () => {
     setLoadingAd(true);
-    intersitialShowAd();
+    const isLoaded = intersitialShowAd();
+    if (!isLoaded) {
+      setLoadingAd(false);
+      _.navigation.navigate('DetailAboutOneCategory', {
+        categoryName: currentCard.current?.categoryName!,
+        billType: currentCard.current?.billType! as 'income' | 'expense',
+        currency: currentCard.current?.currency!,
+        monthAndYearOfBillToShow:
+          currentCard.current?.monthAndYearOfBillToShow!,
+      });
+    }
   };
 
   React.useEffect(() => {

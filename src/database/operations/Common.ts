@@ -77,7 +77,9 @@ class CommonOperations {
     const currentYear = todayDate.getFullYear();
     const yearAndMonthOfBillToDelete = Number(
       `${currentMonth === 0 ? currentYear - 1 : currentYear}${
-        currentMonth === 0 ? 11 : currentMonth - 1
+        currentMonth === 0
+          ? 11
+          : Miscellaneous.MonthAccordingToDatahase(currentMonth - 1)
       }`,
     );
     try {
