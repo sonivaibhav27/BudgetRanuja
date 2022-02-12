@@ -105,10 +105,21 @@ export default () => {
         monthAndYear!,
         category,
       );
-      if (billsData) {
+      if (billsData?.length === 0) {
+        PopupMessage(
+          '',
+          `There is no data for category ${category} for mentioned month and year.`,
+          () => {},
+          false,
+        );
+        return;
+      }
+      if (typeof billsData !== 'undefined') {
         await buildCSV(billsData, category.length > 0 ? true : false);
       }
-    } catch (err) {}
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   React.useEffect(() => {

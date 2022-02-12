@@ -48,7 +48,7 @@ export default () => {
     try {
       const isPremium = await QonversionManager.getActivePermission();
       if (isPremium) {
-        setPremiumStatusOfUser(false);
+        setPremiumStatusOfUser(isPremium);
       }
     } catch (err) {}
   };

@@ -35,9 +35,6 @@ const useAdsConsentHook = () => {
 
       console.log({consentInfo});
       if (consentInfo.isRequestLocationInEeaOrUnknown) {
-        if (__DEV__) {
-          AdsConsent.setStatus(0);
-        }
         const getUserStatus = await AdsConsent.getStatus();
         if (getUserStatus === AdsConsentStatus.UNKNOWN) {
           const formResult = await AdsConsent.showForm({

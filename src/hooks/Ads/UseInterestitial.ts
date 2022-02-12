@@ -5,7 +5,10 @@ import {
 } from '@invertase/react-native-google-ads';
 import React from 'react';
 
-const interstitial = InterstitialAd.createForAdRequest(TestIds.INTERSTITIAL, {
+const INTERSTITIAL_ID = __DEV__
+  ? TestIds.INTERSTITIAL
+  : 'ca-app-pub-2540765935808056/3434906455';
+const interstitial = InterstitialAd.createForAdRequest(INTERSTITIAL_ID, {
   requestNonPersonalizedAdsOnly: false,
 });
 const UseInterstitialAd: () => [

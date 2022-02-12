@@ -6,7 +6,7 @@ import Toast from './Toast';
  * @description Manager for handling the InApp Purchase.
  */
 class QonversionManager {
-  static permissionId = 'Premium';
+  static permissionId = 'Premium_Production';
 
   static async launchQonversionSDK() {
     try {
@@ -43,6 +43,7 @@ class QonversionManager {
         offerings.main != null &&
         offerings.main.products.length > 0
       ) {
+        console.log({offerings});
         return offerings.main.products[0];
       }
     } catch (error) {

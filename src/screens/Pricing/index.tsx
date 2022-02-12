@@ -13,7 +13,7 @@ import {Product} from 'react-native-qonversion';
 import {PressableButton, ActivityLoader} from '../../common';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {Theme} from '../../theme&styles';
-import {Icons, QonversionManager} from '../../utils';
+import {Icons, PopupMessage, QonversionManager} from '../../utils';
 
 type Props = StackScreenProps<MainStackScreenType, 'Pricing'>;
 
@@ -29,7 +29,17 @@ export default (props: Props) => {
   const [isUserMakingPayment, setIsUserMakingPayment] = React.useState(false);
   const getProductsFromQonversion = async () => {
     const product = await QonversionManager.getOfferings();
-    setProductState(product!);
+    if (product) {
+      setProductState(product!);
+    } else {
+      setProductState(product!);
+      PopupMessage(
+        '',
+        'Failed to get product from google, Please try again',
+        () => {},
+        false,
+      );
+    }
   };
   React.useEffect(() => {
     getProductsFromQonversion();
@@ -78,20 +88,22 @@ export default (props: Props) => {
             );
           })}
         </View>
-        <View>
-          <PressableButton
-            disable={isUserMakingPayment}
-            onPress={makePayment}
-            style={styles.purchaseButton}>
-            {isUserMakingPayment ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.purchaseText}>
-                {productState.prettyPrice} / Lifetime
-              </Text>
-            )}
-          </PressableButton>
-        </View>
+        {!!productState && (
+          <View>
+            <PressableButton
+              disable={isUserMakingPayment}
+              onPress={makePayment}
+              style={styles.purchaseButton}>
+              {isUserMakingPayment ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.purchaseText}>
+                  {productState?.prettyPrice} / Lifetime
+                </Text>
+              )}
+            </PressableButton>
+          </View>
+        )}
         <View>
           <Text style={styles.info}>
             By purchasing you will also help the developer to include amazing

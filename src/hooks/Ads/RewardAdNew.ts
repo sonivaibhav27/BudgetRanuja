@@ -7,6 +7,9 @@ import {
 } from '@invertase/react-native-google-ads';
 import React from 'react';
 
+const REWARDED_ID = __DEV__
+  ? TestIds.REWARDED
+  : 'ca-app-pub-2540765935808056/8979967510';
 const UseRewardAd: () => [
   boolean,
   () => void,
@@ -20,6 +23,7 @@ const UseRewardAd: () => [
     if (rewarded) {
       const event = rewarded.onAdEvent((type, error) => {
         if (error) {
+          setAdDismissed(true);
           return;
         }
         if (type === RewardedAdEventType.LOADED) {
@@ -45,7 +49,7 @@ const UseRewardAd: () => [
   const rewardedModify = (status: number) => {
     const _rewarded = RewardedAd.createForAdRequest(
       //   'ca-app-pub-3940256099942544/5224354917',
-      TestIds.REWARDED,
+      REWARDED_ID,
       {
         requestNonPersonalizedAdsOnly:
           AdsConsentStatus.NON_PERSONALIZED === status,
