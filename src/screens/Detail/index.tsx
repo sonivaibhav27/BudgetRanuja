@@ -13,7 +13,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {useRecoilCallback, useSetRecoilState} from 'recoil';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {AuditSection, ActionButtons, DataSection} from './components';
-import {DayJs, Icons, Toast} from '../../utils';
+import {DayJs, Icons} from '../../utils';
 import {BillOperations, BudgetOperations} from '../../database';
 import {BillsAtom, BudgetAtom, DetailState} from '../../State/Atoms';
 import {ActivityLoader} from '../../common';
@@ -105,7 +105,7 @@ export default (_: Props) => {
       DismissedInterestialAdCallback();
       setLoadingAd(false);
       if (currentCard.current === null) {
-        Toast('Something went wrong. Please reload the app.');
+        //Toast('Something went wrong. Please reload the app.');
         return;
       }
       _.navigation.navigate('DetailAboutOneCategory', {
