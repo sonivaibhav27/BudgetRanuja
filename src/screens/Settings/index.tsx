@@ -7,7 +7,6 @@ import {
   ScrollView,
   Linking,
   View,
-  NativeModules,
 } from 'react-native';
 import {useRecoilCallback, useSetRecoilState} from 'recoil';
 import {ActivityLoader, FullScreenModal, PressableButton} from '../../common';
@@ -16,7 +15,13 @@ import {CurrencyOperations} from '../../database';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {UtilsAtom} from '../../State';
 import {ColorsTheme} from '../../theme&styles/theme';
-import {Icons, Logger, QonversionManager, Toast} from '../../utils';
+import {
+  Icons,
+  Logger,
+  NativeModuleFunctions,
+  QonversionManager,
+  Toast,
+} from '../../utils';
 import {
   IconButton,
   SettingSection,
@@ -25,7 +30,6 @@ import {
   CategoryList,
 } from './components';
 
-const {CustomNativeModule} = NativeModules;
 const openAnotherApp = async (
   appName: 'mail' | 'whatsapp' | 'browser',
   url: string,
@@ -66,7 +70,7 @@ export default ({navigation}: Props) => {
   };
 
   React.useEffect(() => {
-    CustomNativeModule.getAppVersion((version: string | null) => {
+    NativeModuleFunctions.getAppVersion((version: string) => {
       setAppVerion(version);
     });
   }, []);

@@ -15,7 +15,9 @@ import {DatabaseConfig, Keys} from './src/config';
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 import {Database} from '@nozbe/watermelondb';
 import migrations from './src/database/_init/migrations';
-import {QonversionManager} from './src/utils';
+import {NativeModuleFunctions, QonversionManager} from './src/utils';
+
+NativeModuleFunctions.initializeDebugFacebook();
 
 Sentry.init({
   dsn: Keys.REMOTE_LOGGER_KEY,

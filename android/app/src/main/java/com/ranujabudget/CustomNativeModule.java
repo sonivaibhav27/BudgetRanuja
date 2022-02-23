@@ -2,9 +2,13 @@ package com.ranujabudget;
 import android.app.Activity;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.applovin.sdk.AppLovinPrivacySettings;
+import com.facebook.ads.AdSettings;
+import com.facebook.ads.BuildConfig;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -14,10 +18,10 @@ import com.facebook.react.bridge.ReactMethod;
 import com.google.android.play.core.review.ReviewInfo;
 import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
-import com.google.android.play.core.review.testing.FakeReviewManager;
 import com.google.android.play.core.tasks.OnCompleteListener;
 import com.google.android.play.core.tasks.Task;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -29,13 +33,25 @@ public class CustomNativeModule extends ReactContextBaseJavaModule{
     }
 
     @ReactMethod
+    public  void fbDebug(){
+        Log.i("Debug","Done");
+        AdSettings.setDebugBuild(true);
+    }
+
+    @ReactMethod
+    public void applovinConsent(boolean consent){
+        AppLovinPrivacySettings.setHasUserConsent(consent,mContext);
+    }
+
+    @ReactMethod
     public void getAppVersion(Callback callback)  {
+
         try {
           PackageInfo packageInfo =   mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
           callback.invoke(packageInfo.versionName);
         }
         catch (Exception e){
-            callback.invoke(null);
+            callback.invoke("");
         }
     }
     @ReactMethod

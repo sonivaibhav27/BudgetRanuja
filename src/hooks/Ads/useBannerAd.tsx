@@ -3,11 +3,10 @@ import {
   AdsConsentStatus,
   BannerAd,
   BannerAdSize,
-} from '@invertase/react-native-google-ads';
+  TestIds,
+} from 'react-native-google-mobile-ads';
 
-const BANNER_ID = __DEV__
-  ? 'ca-app-pub-2540765935808056/7973234497'
-  : 'ca-app-pub-2540765935808056/3919212526';
+const BANNER_ID = 'ca-app-pub-2540765935808056/3919212526';
 
 export default ({
   consentStatus,

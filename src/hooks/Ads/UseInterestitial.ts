@@ -2,12 +2,10 @@ import {
   AdEventType,
   InterstitialAd,
   TestIds,
-} from '@invertase/react-native-google-ads';
+} from 'react-native-google-mobile-ads';
 import React from 'react';
 
-const INTERSTITIAL_ID = __DEV__
-  ? TestIds.INTERSTITIAL
-  : 'ca-app-pub-2540765935808056/3434906455';
+const INTERSTITIAL_ID = 'ca-app-pub-2540765935808056/3434906455';
 const interstitial = InterstitialAd.createForAdRequest(INTERSTITIAL_ID, {
   requestNonPersonalizedAdsOnly: false,
 });
@@ -33,7 +31,11 @@ const UseInterstitialAd: () => [
   };
   React.useEffect(() => {
     const event = eventHandler();
-    return () => event();
+    return () => {
+      if (event) {
+        event();
+      }
+    };
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

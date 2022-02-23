@@ -2,13 +2,14 @@ import {
   AdsConsent,
   AdsConsentDebugGeography,
   AdsConsentStatus,
-} from '@invertase/react-native-google-ads';
+} from 'react-native-google-mobile-ads';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import React from 'react';
 import {useSetRecoilState} from 'recoil';
 import {MainStackScreenType} from '../../navigations/MainStack/types';
 import {UtilsAtom} from '../../State';
+import {NativeModuleFunctions} from '../../utils';
 
 type UserConsentStatus = 0 | 1 | 2 | null;
 
@@ -51,8 +52,10 @@ const useAdsConsentHook = () => {
             formResult.status === AdsConsentStatus.NON_PERSONALIZED
           ) {
             setUserConsent(formResult.status);
+            NativeModuleFunctions.setAppLovinConsent(true);
           } else {
             //Don't allow user In.
+            NativeModuleFunctions.setAppLovinConsent(false);
           }
         } else {
           setUserConsent(getUserStatus);

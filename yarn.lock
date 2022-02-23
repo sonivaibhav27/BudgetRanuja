@@ -839,11 +839,6 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.0.tgz#87de7af9c231826fdd68ac7258f77c429e0e5fcf"
   integrity sha512-wdppn25U8z/2yiaT6YGquE6X8sSv7hNMWSXYSSU1jGv/yd6XqjXgTDJ8KP4NgjTXfJ3GbRjeeb8RTV7a/VpM+w==
 
-"@invertase/react-native-google-ads@^3.4.0":
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/@invertase/react-native-google-ads/-/react-native-google-ads-3.4.0.tgz#92ee78811622a8bbf957ba7328831853c831a948"
-  integrity sha512-Z1k6oxr5kc4g63V2kdfSpAcEGHPzQ12s82jMv7NYhHrg4JOrUVMM+LrvpYLTg15qon5ReU8L2dPc1q2s0O5+ZQ==
-
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@istanbuljs/load-nyc-config/-/load-nyc-config-1.1.0.tgz#fd3db1d59ecf7cf121e80650bb86712f9b55eced"
@@ -6416,6 +6411,11 @@ react-native-gesture-handler@^1.10.3:
     hoist-non-react-statics "^3.3.0"
     invariant "^2.2.4"
     prop-types "^15.7.2"
+
+react-native-google-mobile-ads@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-google-mobile-ads/-/react-native-google-mobile-ads-4.2.0.tgz#f0922801b9c3155d442b234a9249517b8019d447"
+  integrity sha512-eraq84ebKeWWh7INBP3GtFvK4iX62Iu6e5XobGdGmNZUTJmx67vpLdqzrHs7d1CrXhB0bNBtzsowxgMhcLwtxw==
 
 react-native-month-year-picker@^1.8.0:
   version "1.8.0"

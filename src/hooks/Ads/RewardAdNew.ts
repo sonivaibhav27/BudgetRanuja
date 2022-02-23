@@ -1,15 +1,11 @@
 import {
   AdsConsentStatus,
-  GoogleAdsTypes,
   RewardedAd,
   RewardedAdEventType,
-  TestIds,
-} from '@invertase/react-native-google-ads';
+} from 'react-native-google-mobile-ads';
 import React from 'react';
 
-const REWARDED_ID = __DEV__
-  ? TestIds.REWARDED
-  : 'ca-app-pub-2540765935808056/8979967510';
+const REWARDED_ID = 'ca-app-pub-2540765935808056/8979967510';
 const UseRewardAd: () => [
   boolean,
   () => void,
@@ -17,7 +13,7 @@ const UseRewardAd: () => [
   (s: number) => void,
 ] = () => {
   const [adDismissed, setAdDismissed] = React.useState(false);
-  const [rewarded, setRewarded] = React.useState<GoogleAdsTypes.RewardedAd>();
+  const [rewarded, setRewarded] = React.useState<RewardedAd>();
   const isWatchedAdRef = React.useRef(false);
   const eventHandler = React.useCallback(() => {
     if (rewarded) {
@@ -43,7 +39,11 @@ const UseRewardAd: () => [
 
   React.useEffect(() => {
     const event = eventHandler();
-    return event;
+    return () => {
+      if (event) {
+        event();
+      }
+    };
   }, [eventHandler]);
 
   const rewardedModify = (status: number) => {
