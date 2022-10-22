@@ -4,7 +4,7 @@ import {WatermenlonDB} from '../../..';
 import {DatabaseConfig} from '../../config';
 import {Miscellaneous, Toast} from '../../utils';
 import IncomeCategories from '../../data/IncomeCategories';
-import {TCategoryType, CategoryModelType} from '../../types';
+import {CategoriesTypes} from '../../types';
 
 const MAX_CATERGORY_ALLOWED = 16;
 class Category {
@@ -21,7 +21,7 @@ class Category {
     let expenseCategoriesPrepareCreate = expenseCategories.map(category => {
       return WatermenlonDB.collections
         .get(DatabaseConfig.tables.Categories)
-        .prepareCreate((model: CategoryModelType) => {
+        .prepareCreate((model: CategoriesTypes.TCategoriesDatabaseModel) => {
           model.CategoryId = Miscellaneous.GenerateUUID();
           model.CategoryName = category.categoryName;
           model.IsDeleted = 0;
@@ -32,7 +32,7 @@ class Category {
     let incomeCategoriesPrepareCreate = IncomeCategories.map(category => {
       return WatermenlonDB.collections
         .get(DatabaseConfig.tables.Categories)
-        .prepareCreate((model: CategoryModelType) => {
+        .prepareCreate((model: CategoriesTypes.TCategoriesDatabaseModel) => {
           model.CategoryId = Miscellaneous.GenerateUUID();
           model.CategoryName = category.categoryName;
           model.IsDeleted = 0;
@@ -55,7 +55,7 @@ class Category {
     }
   }
 
-  static createCategoryDictionary(categories: TCategoryType[]) {
+  static createCategoryDictionary(categories: CategoriesTypes.TCategories[]) {
     let map: {[key: string]: [string, string]} = {};
     categories.map(category => {
       map[category.CategoryId!] = [
@@ -67,13 +67,14 @@ class Category {
     return map;
   }
 
-  static async getAllCategories(): Promise<TCategoryType[] | undefined> {
+  static async getAllCategories(): Promise<
+    CategoriesTypes.TCategories[] | undefined
+  > {
     try {
-      const categoryData: CategoryModelType[] = await this.getDBCollection()
-        .query()
-        .fetch();
-      let santitizeCategoryData: TCategoryType[] = categoryData.map(
-        (data: CategoryModelType) => {
+      const categoryData: CategoriesTypes.TCategoriesDatabaseModel[] =
+        await this.getDBCollection().query().fetch();
+      let santitizeCategoryData: CategoriesTypes.TCategories[] =
+        categoryData.map((data: CategoriesTypes.TCategoriesDatabaseModel) => {
           return {
             CategoryId: data.CategoryId!,
             CategoryName: data.CategoryName!,
@@ -81,8 +82,7 @@ class Category {
             IsDeleted: data.IsDeleted!,
             CategoryType: data.CategoryType! === 1 ? 'income' : 'expense',
           };
-        },
-      );
+        });
       this.createCategoryDictionary(santitizeCategoryData);
       return santitizeCategoryData;
     } catch (err) {
@@ -112,16 +112,18 @@ class Category {
     const categoryType = type === 'expense' ? 2 : 1;
     try {
       await WatermenlonDB.write(async () => {
-        this.getDBCollection().create((model: CategoryModelType) => {
-          model.CategoryId = categoryId;
-          model.CategoryName = categoryName;
-          model.CategoryType = categoryType;
-          model.IsDeleted = 0;
-          model.CategoryColorCode = type === 'expense' ? color : '';
-        });
+        this.getDBCollection().create(
+          (model: CategoriesTypes.TCategoriesDatabaseModel) => {
+            model.CategoryId = categoryId;
+            model.CategoryName = categoryName;
+            model.CategoryType = categoryType;
+            model.IsDeleted = 0;
+            model.CategoryColorCode = type === 'expense' ? color : '';
+          },
+        );
       });
       return await this.getAllCategories();
-    } catch (err) {
+    } catch (err: any) {
       if (err.name === 'Diagnostic Error') {
         Toast('Something went failed with database ' + err.message);
         return null;
@@ -141,13 +143,15 @@ class Category {
         .fetch();
       if (category.length === 1) {
         await WatermenlonDB.write(async () => {
-          await category[0].update((model: CategoryModelType) => {
-            model.IsDeleted = 1;
-          });
+          await category[0].update(
+            (model: CategoriesTypes.TCategoriesDatabaseModel) => {
+              model.IsDeleted = 1;
+            },
+          );
         });
         Toast('Successfully deleted.');
       }
-    } catch (err) {
+    } catch (err: any) {
       Toast('Error while Deleting' + err.message, 'LONG');
     }
   }
@@ -176,10 +180,12 @@ class Category {
         return;
       }
       await WatermenlonDB.write(async () => {
-        getCategoryFromDB[0].update((category: CategoryModelType) => {
-          category.CategoryName = newCategoryName;
-          category.CategoryColorCode = categoryColor;
-        });
+        getCategoryFromDB[0].update(
+          (category: CategoriesTypes.TCategoriesDatabaseModel) => {
+            category.CategoryName = newCategoryName;
+            category.CategoryColorCode = categoryColor;
+          },
+        );
       });
       // new object to reflect changed category name with other screen.
       delete this._rawDictionary[categoryId];

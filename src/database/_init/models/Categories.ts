@@ -1,9 +1,9 @@
 import {Model} from '@nozbe/watermelondb';
 import {field} from '@nozbe/watermelondb/decorators';
-import {DatabaseConfig} from '../../../config';
+import {TABLES} from '../../db.config';
 
 class Categories extends Model {
-  static table = DatabaseConfig.tables.Categories;
+  static table = TABLES.Categories;
   @field('Category_Id') CategoryId!: string;
   @field('Category_Name') CategoryName!: string;
   @field('IsDeleted') IsDeleted!: number;

@@ -1,16 +1,15 @@
 import {Q} from '@nozbe/watermelondb';
 import {WatermenlonDB} from '../../..';
 import {DatabaseConfig} from '../../config';
-import {BudgetModelType} from '../../types';
+import {BudgetTypes} from '../../types';
 import {DayJs, Logger, Toast} from '../../utils';
 
 class BudgetOperations {
   static async getCurrentMonthBudget(monthAndYear: number) {
-    const getBudget: BudgetModelType[] = await WatermenlonDB.get(
-      DatabaseConfig.tables.Budget,
-    )
-      .query(Q.where('DateAsYearAndMonth', monthAndYear))
-      .fetch();
+    const getBudget: BudgetTypes.TBudgetDatabaseModel[] =
+      await WatermenlonDB.get(DatabaseConfig.tables.Budget)
+        .query(Q.where('DateAsYearAndMonth', monthAndYear))
+        .fetch();
     if (getBudget.length === 0) {
       return undefined;
     }
@@ -23,15 +22,14 @@ class BudgetOperations {
   static async upsertBudget(budgetAmount: number) {
     const monthAndYear = DayJs.getCurrentYearAndMonth();
     try {
-      const getBudget: BudgetModelType[] = await WatermenlonDB.get(
-        DatabaseConfig.tables.Budget,
-      )
-        .query(Q.where('DateAsYearAndMonth', monthAndYear))
-        .fetch();
+      const getBudget: BudgetTypes.TBudgetDatabaseModel[] =
+        await WatermenlonDB.get(DatabaseConfig.tables.Budget)
+          .query(Q.where('DateAsYearAndMonth', monthAndYear))
+          .fetch();
       if (getBudget.length === 0) {
         await WatermenlonDB.write(async () => {
           await WatermenlonDB.get(DatabaseConfig.tables.Budget).create(
-            (budget: BudgetModelType) => {
+            (budget: BudgetTypes.TBudgetDatabaseModel) => {
               budget.BudgetAmount = budgetAmount;
               budget.DateAsYearAndMonth = monthAndYear;
             },

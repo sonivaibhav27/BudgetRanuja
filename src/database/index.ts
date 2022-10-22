@@ -8,3 +8,5 @@ export {
   CategoryOperations,
   CurrencyOperations,
 } from './operations';
+export {default as DbUtils} from './utils';
+export {default as initializeWatermenlonDb} from './db.startup';

@@ -1,9 +1,9 @@
 import {Model} from '@nozbe/watermelondb';
 import {field} from '@nozbe/watermelondb/decorators';
-import {DatabaseConfig} from '../../../config';
+import {TABLES} from '../../db.config';
 
 export default class Budget extends Model {
-  static table = DatabaseConfig.tables.Budget;
+  static table = TABLES.Budget;
 
   @field('BudgetAmount') BudgetAmount!: number;
 

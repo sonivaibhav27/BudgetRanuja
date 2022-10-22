@@ -2,11 +2,7 @@ import {Q} from '@nozbe/watermelondb';
 import {DatabaseConfig} from '../../config';
 import {DayJs, Logger, Miscellaneous, Toast} from '../../utils';
 import {WatermenlonDB} from '../../..';
-import {
-  BillModelType,
-  OnlyInformationFromBillType,
-  TCSVBills,
-} from '../../types';
+import {BillTypes, UtilTypes} from '../../types';
 import {CategoryOperations} from '.';
 
 export const createBill = async (
@@ -16,7 +12,7 @@ export const createBill = async (
   typeOfBill: string,
   isRepeatDaily?: boolean,
   remark?: string,
-): Promise<BillModelType | undefined> => {
+): Promise<BillTypes.TBillDatabaseModel | undefined> => {
   if (
     categoryId.length === 0 ||
     typeOfBill.length === 0 ||
@@ -30,13 +26,13 @@ export const createBill = async (
     const billType = typeOfBill === 'income' ? 1 : 2;
     let record;
     if (isRepeatDaily) {
-      let bills: BillModelType[] = [];
+      let bills: BillTypes.TBillDatabaseModel[] = [];
       const lastDateOfMonth = DayJs.getLastDayOfMonth();
       for (let day = date.getDate(); day <= lastDateOfMonth; day++) {
         bills.push(
           WatermenlonDB.collections
             .get(DatabaseConfig.tables.BudgetBills)
-            .prepareCreate((model: BillModelType) => {
+            .prepareCreate((model: BillTypes.TBillDatabaseModel) => {
               model.billAmount = +amount;
               model.categoryId = categoryId;
               model.billType = billType;
@@ -57,7 +53,7 @@ export const createBill = async (
       await WatermenlonDB.write(async () => {
         record = await WatermenlonDB.collections
           .get(DatabaseConfig.tables.BudgetBills)
-          .create((budgetBills: BillModelType) => {
+          .create((budgetBills: BillTypes.TBillDatabaseModel) => {
             budgetBills.billAmount = +amount;
             budgetBills.categoryId = categoryId;
             budgetBills.billDate = date;
@@ -89,7 +85,7 @@ export const updateBill = async (
     ).find(id);
     if (findModel) {
       await WatermenlonDB.write(async () => {
-        await findModel.update((model: BillModelType) => {
+        await findModel.update((model: BillTypes.TBillDatabaseModel) => {
           model.billAmount = +amount!;
           model.billDate = date;
           model.billType = typeOfBill === 'income' ? 1 : 2;
@@ -101,7 +97,7 @@ export const updateBill = async (
       return;
     }
     throw new Error('Id not found in database.');
-  } catch (error) {
+  } catch (error: any) {
     Toast('Error while updating the bill ' + error.message);
   }
 };
@@ -119,7 +115,7 @@ export const deleteBill = async (id: string) => {
       return true;
     }
     throw new Error('Id not found in database.');
-  } catch (error) {
+  } catch (error: any) {
     Toast('Error while deleting the bill ' + error.message);
     return false;
   }
@@ -127,21 +123,20 @@ export const deleteBill = async (id: string) => {
 
 export const getCurrentMonthBills = async (forYearAndMonth: number) => {
   try {
-    let bills: BillModelType[] | undefined;
+    let bills: BillTypes.TBillDatabaseModel[] | undefined;
     bills = await WatermenlonDB.collections
       .get(DatabaseConfig.tables.BudgetBills)
       .query(Q.where('DateAsYearAndMonth', Q.eq(forYearAndMonth)))
       .fetch();
 
-    const sanitizeOutputBills: OnlyInformationFromBillType[] = bills?.map(
-      bill => {
+    const sanitizeOutputBills: UtilTypes.TOnlyInformationFromBill[] =
+      bills?.map(bill => {
         return {
           billAmount: bill.billAmount!,
           typeOfBill: bill.billType! === 1 ? 'income' : 'expense',
           categoryId: bill.categoryId!,
         };
-      },
-    );
+      });
     return sanitizeOutputBills;
   } catch (err) {
     Logger.consoleLog(`Error in Getting Bills. ${err}`, 'error');
@@ -154,7 +149,7 @@ export const getBillsByCategoriesAndMonth = async (
   monthAndYear: number,
 ) => {
   try {
-    let bills: BillModelType[] | undefined;
+    let bills: BillTypes.TBillDatabaseModel[] | undefined;
     bills = await WatermenlonDB.collections
       .get(DatabaseConfig.tables.BudgetBills)
       .query(
@@ -198,12 +193,12 @@ export const generateReportData = async (date: Date, categoryName: string) => {
           Q.where('Category_Id', Q.eq(categoryId!)),
         )
       : Q.where('DateAsYearAndMonth', Q.eq(yearAndMonth));
-    let bills: BillModelType[] | undefined;
+    let bills: BillTypes.TBillDatabaseModel[] | undefined;
     bills = await WatermenlonDB.collections
       .get(DatabaseConfig.tables.BudgetBills)
       .query(condition, Q.sortBy('Date_at', Q.asc))
       .fetch();
-    const sanitize: TCSVBills[] = bills.map(bill => {
+    const sanitize: BillTypes.TCSVBill[] = bills.map(bill => {
       return {
         billAmount: bill.billAmount!,
         billDate: bill.billDate!,
@@ -224,7 +219,7 @@ export const getBillsByDateInDetailForCSV = async (
   dateAsYearAndMonth: number,
 ) => {
   try {
-    let bills: BillModelType[] | undefined;
+    let bills: BillTypes.TBillDatabaseModel[] | undefined;
     bills = await WatermenlonDB.collections
       .get(DatabaseConfig.tables.BudgetBills)
       .query(
@@ -232,7 +227,7 @@ export const getBillsByDateInDetailForCSV = async (
         Q.sortBy('Date_at', Q.asc),
       )
       .fetch();
-    const sanitize: TCSVBills[] = bills.map(bill => {
+    const sanitize: BillTypes.TCSVBill[] = bills.map(bill => {
       return {
         billAmount: bill.billAmount!,
         billDate: bill.billDate!,

@@ -1,12 +1,12 @@
 import {appSchema, tableSchema} from '@nozbe/watermelondb';
-import {DatabaseConfig} from '../../../config';
+import {TABLES, DBVERSION} from '../../db.config';
 
 export default appSchema({
-  version: 3,
+  version: DBVERSION,
   tables: [
     // We'll add tableSchemas here later
     tableSchema({
-      name: DatabaseConfig.tables.BudgetBills,
+      name: TABLES.BudgetBills,
       columns: [
         {
           name: 'Amount',
@@ -36,7 +36,7 @@ export default appSchema({
       ],
     }),
     tableSchema({
-      name: DatabaseConfig.tables.Budget,
+      name: TABLES.Budget,
       columns: [
         {
           name: 'DateAsYearAndMonth',
@@ -49,7 +49,7 @@ export default appSchema({
       ],
     }),
     tableSchema({
-      name: DatabaseConfig.tables.Categories,
+      name: TABLES.Categories,
       columns: [
         {
           name: 'Category_Id',

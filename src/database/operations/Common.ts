@@ -3,8 +3,8 @@ import {Alert} from 'react-native';
 import {DatabaseConfig} from '../../config';
 import {DayJs, Miscellaneous, Toast} from '../../utils';
 import {WatermenlonDB} from '../../..';
-import {BudgetModelType, TCategoryType, BillModelType} from '../../types';
 import {BillOperations, CategoryOperations, BudgetOperations} from '.';
+import {BillTypes, BudgetTypes, CategoriesTypes} from '../../types';
 
 type DeleteType =
   | 'last_month'
@@ -83,16 +83,18 @@ class CommonOperations {
       }`,
     );
     try {
-      const bills: BillModelType[] = await this.getBillsCollection()
-        .query(Q.where(this.columnName, yearAndMonthOfBillToDelete))
-        .fetch();
+      const bills: BillTypes.TBillDatabaseModel[] =
+        await this.getBillsCollection()
+          .query(Q.where(this.columnName, yearAndMonthOfBillToDelete))
+          .fetch();
 
-      const budget: BudgetModelType[] = await this.getBudgetCollection()
-        .query(Q.where(this.columnName, yearAndMonthOfBillToDelete))
-        .fetch();
+      const budget: BudgetTypes.TBudgetDatabaseModel[] =
+        await this.getBudgetCollection()
+          .query(Q.where(this.columnName, yearAndMonthOfBillToDelete))
+          .fetch();
 
       this._DeleteHelper(bills, budget);
-    } catch (err) {
+    } catch (err: any) {
       Toast('Error while Deleting bill ' + err.message, 'LONG');
     }
   }
@@ -112,20 +114,28 @@ class CommonOperations {
       Number(`${endRange.getFullYear()}${endMonth}`),
     ];
     try {
-      const bills: BillModelType[] = await this.getBillsCollection()
-        .query(
-          Q.where(this.columnName, Q.between(betweenRange[0], betweenRange[1])),
-        )
-        .fetch();
+      const bills: BillTypes.TBillDatabaseModel[] =
+        await this.getBillsCollection()
+          .query(
+            Q.where(
+              this.columnName,
+              Q.between(betweenRange[0], betweenRange[1]),
+            ),
+          )
+          .fetch();
 
-      const budget: BudgetModelType[] = await this.getBudgetCollection()
-        .query(
-          Q.where(this.columnName, Q.between(betweenRange[0], betweenRange[1])),
-        )
-        .fetch();
+      const budget: BudgetTypes.TBudgetDatabaseModel[] =
+        await this.getBudgetCollection()
+          .query(
+            Q.where(
+              this.columnName,
+              Q.between(betweenRange[0], betweenRange[1]),
+            ),
+          )
+          .fetch();
 
       this._DeleteHelper(bills, budget);
-    } catch (err) {
+    } catch (err: any) {
       Toast('Error while Deleting bill ' + err.message, 'LONG');
     }
   }
@@ -143,20 +153,28 @@ class CommonOperations {
       Number(`${endRange.getFullYear()}${endMonthSanitize}`),
     ];
     try {
-      const bills: BillModelType[] = await this.getBillsCollection()
-        .query(
-          Q.where(this.columnName, Q.between(betweenRange[0], betweenRange[1])),
-        )
-        .fetch();
+      const bills: BillTypes.TBillDatabaseModel[] =
+        await this.getBillsCollection()
+          .query(
+            Q.where(
+              this.columnName,
+              Q.between(betweenRange[0], betweenRange[1]),
+            ),
+          )
+          .fetch();
 
-      const budget: BudgetModelType[] = await this.getBudgetCollection()
-        .query(
-          Q.where(this.columnName, Q.between(betweenRange[0], betweenRange[1])),
-        )
-        .fetch();
+      const budget: BudgetTypes.TBudgetDatabaseModel[] =
+        await this.getBudgetCollection()
+          .query(
+            Q.where(
+              this.columnName,
+              Q.between(betweenRange[0], betweenRange[1]),
+            ),
+          )
+          .fetch();
 
       this._DeleteHelper(bills, budget);
-    } catch (err) {
+    } catch (err: any) {
       Toast('Error while Deleting bill ' + err.message, 'LONG');
     }
   }
@@ -169,27 +187,35 @@ class CommonOperations {
       Number(`${yearToDelete}11`),
     ];
     try {
-      const bills: BillModelType[] = await this.getBillsCollection()
-        .query(
-          Q.where(this.columnName, Q.between(betweenRange[0], betweenRange[1])),
-        )
-        .fetch();
+      const bills: BillTypes.TBillDatabaseModel[] =
+        await this.getBillsCollection()
+          .query(
+            Q.where(
+              this.columnName,
+              Q.between(betweenRange[0], betweenRange[1]),
+            ),
+          )
+          .fetch();
 
-      const budget: BudgetModelType[] = await this.getBudgetCollection()
-        .query(
-          Q.where(this.columnName, Q.between(betweenRange[0], betweenRange[1])),
-        )
-        .fetch();
+      const budget: BudgetTypes.TBudgetDatabaseModel[] =
+        await this.getBudgetCollection()
+          .query(
+            Q.where(
+              this.columnName,
+              Q.between(betweenRange[0], betweenRange[1]),
+            ),
+          )
+          .fetch();
 
       this._DeleteHelper(bills, budget);
-    } catch (err) {
+    } catch (err: any) {
       Toast('Error while Deleting bill ' + err.message, 'LONG');
     }
   }
 
   static async _DeleteHelper(
-    bills: BillModelType[],
-    budget: BudgetModelType[],
+    bills: BillTypes.TBillDatabaseModel[],
+    budget: BudgetTypes.TBudgetDatabaseModel[],
   ) {
     let deleteBills = bills.map(bill => {
       return bill.prepareDestroyPermanently();
@@ -210,7 +236,7 @@ class CommonOperations {
   ) {
     try {
       const bills = BillOperations.getCurrentMonthBills(dateAsYearAndMonth);
-      let categories: Promise<TCategoryType[] | undefined>;
+      let categories: Promise<CategoriesTypes.TCategories[] | undefined>;
       if (getCategories) {
         categories = CategoryOperations.getAllCategories();
       }
