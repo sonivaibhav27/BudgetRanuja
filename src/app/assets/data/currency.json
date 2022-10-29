@@ -16,7 +16,7 @@
     "symbol":"AED"
   },
   {
-    "name":"Rupees",
+    "name":"Indian Rupee",
     "symbol":"₹"
   },
   {
@@ -38,5 +38,5 @@
   {
     "name":"Argentina Peso",
     "symbol":"$"
-  },
+  }
 ]
