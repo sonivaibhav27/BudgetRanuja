@@ -12,7 +12,6 @@ export default class Currency {
     try {
       await WatermenlonDB.adapter.setLocal(this._symbol, currency);
       await WatermenlonDB.adapter.setLocal(this._name, currencyName);
-      Helper.makeToast('Currency Updated Succesfully');
     } catch (err: any) {
       Helper.makeToast('Error: ' + err.message);
     }
@@ -21,6 +20,9 @@ export default class Currency {
     try {
       const symbol = await WatermenlonDB.adapter.getLocal(this._symbol);
       const name = await WatermenlonDB.adapter.getLocal(this._name);
+      if (symbol === undefined && name === undefined) {
+        return {symbol: '$', name: 'USD Dollar'};
+      }
       return {symbol, name};
     } catch (err: any) {
       // return default value if  not found.

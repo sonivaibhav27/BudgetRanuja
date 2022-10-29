@@ -166,7 +166,6 @@ export const getBillsByCategoriesAndMonth = async (
         billDate: bill.billDate!,
         billRemark: bill.billRemark!,
         categoryId: bill.categoryId!,
-        typeOfBill: bill.billType! === 1 ? 'income' : 'expense',
         id: bill.id,
       };
     });
