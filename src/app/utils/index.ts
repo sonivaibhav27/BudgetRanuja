@@ -1,11 +1,11 @@
 import {Alert, ToastAndroid} from 'react-native';
-
+import {BillTypes} from '../../types';
 export default class Utils {
   static makeAlert = (
     title: string,
     message: string,
     onOkPress: () => void = () => {},
-    showCancel: boolean = true,
+    showCancel: boolean = false,
   ) => {
     Alert.alert(title, message, [
       {
@@ -40,5 +40,26 @@ export default class Utils {
       Math.random().toString(36).substr(2) +
       randomNumber
     );
+  };
+
+  //todo : change this to generic object instead.
+  static getTotalAmount = (data: BillTypes.TBillDatabaseModel[]) => {
+    return data ? data.reduce((prev, curr) => prev + curr.billAmount!, 0) : -1;
+  };
+  static getMonths = () => {
+    return [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
   };
 }
