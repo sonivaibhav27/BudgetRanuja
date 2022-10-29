@@ -6,7 +6,6 @@ class DateHelper {
   }
 
   static todayDate() {
-    console.log(dayjs());
     return dayjs();
   }
 
