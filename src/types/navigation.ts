@@ -5,7 +5,7 @@ export type TRootStackScreens = {
   BottomTabBarScreen: undefined;
   CreateEditScreen: {
     categoryData?: TEditBill;
-    isCreateScreen: boolean;
+    typeOfScreen: 'Edit' | 'Create';
   };
 };
 export type TBottomTabScreens = {
@@ -31,13 +31,15 @@ export type THomeStackScreen = {
 };
 
 export type TSettingStackScreen = {
-  Settings: undefined;
+  Settings: {
+    openModal?: 'Categories';
+  };
   Edit: {
     category?: {
       categoryName: string;
-      categoryType: 'income' | 'expense';
-      categoryId: string;
-      categoryColor: string;
+      categoryType?: 'income' | 'expense';
+      categoryId?: string;
+      categoryColor?: string;
     };
     categories?: TCategories[];
     comingFrom: 'Category' | 'Currency';

@@ -1,4 +1,3 @@
-export * as ExtraDetailTypes from './ExtraDetail';
 export * as UtilTypes from './utils';
 export * as NavigationTypes from './navigation';
 export * as CategoriesTypes from './category';
