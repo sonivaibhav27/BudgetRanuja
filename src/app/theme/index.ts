@@ -9,11 +9,16 @@ export const COLORS = {
   secondry: '#cc5500',
   mediumGray: '#666666',
   placeholder: '#AAAAAA',
+  overlay: 'rgba(0,0,0,0.1)',
+  greenReport: '#008000',
+  lightRed: '#F6F2F2',
+  lightGreen: '#F2F7F5',
 };
 
 export const PADDING = {
   big: 20,
   medium: 10,
+  mediumBig: 15,
 };
 
 export const BORDER_RADIUS = {
