@@ -12,7 +12,7 @@ export default (RootComponent: () => JSX.Element) => {
           title: 'New Update Available',
         },
         mandatoryInstallMode: CodePush.InstallMode.ON_NEXT_RESTART,
-      });
+      }).catch(_ => {});
     }
     render() {
       return <RootComponent />;
