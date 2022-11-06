@@ -20,14 +20,14 @@ export default class Currency {
     try {
       const symbol = await WatermenlonDB.adapter.getLocal(this._symbol);
       const name = await WatermenlonDB.adapter.getLocal(this._name);
-      if (symbol === undefined && name === undefined) {
+      if (!symbol && !name) {
         return {symbol: '$', name: 'USD Dollar'};
       }
       return {symbol, name};
     } catch (err: any) {
       // return default value if  not found.
       Helper.makeToast('Error: ' + err.message);
-      return {symbol: '$', name: 'USD'};
+      return {symbol: '$', name: 'USD Dollar'};
     }
   }
 }

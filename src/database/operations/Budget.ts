@@ -1,13 +1,14 @@
 import {Q} from '@nozbe/watermelondb';
 import {WatermenlonDB} from '../../..';
-import {DatabaseConfig} from '../../config';
+import {DateHelper} from '../../app/helper';
+import Utils from '../../app/utils';
 import {BudgetTypes} from '../../types';
-import {DayJs, Logger, Toast} from '../../utils';
+import {TABLES} from '../db.config';
 
 class BudgetOperations {
   static async getCurrentMonthBudget(monthAndYear: number) {
     const getBudget: BudgetTypes.TBudgetDatabaseModel[] =
-      await WatermenlonDB.get(DatabaseConfig.tables.Budget)
+      await WatermenlonDB.get(TABLES.Budget)
         .query(Q.where('DateAsYearAndMonth', monthAndYear))
         .fetch();
     if (getBudget.length === 0) {
@@ -20,34 +21,34 @@ class BudgetOperations {
   }
 
   static async upsertBudget(budgetAmount: number) {
-    const monthAndYear = DayJs.getCurrentYearAndMonth();
+    const monthAndYear = DateHelper.getCurrentYearAndMonth();
     try {
       const getBudget: BudgetTypes.TBudgetDatabaseModel[] =
-        await WatermenlonDB.get(DatabaseConfig.tables.Budget)
+        await WatermenlonDB.get(TABLES.Budget)
           .query(Q.where('DateAsYearAndMonth', monthAndYear))
           .fetch();
       if (getBudget.length === 0) {
         await WatermenlonDB.write(async () => {
-          await WatermenlonDB.get(DatabaseConfig.tables.Budget).create(
+          await WatermenlonDB.get(TABLES.Budget).create(
             (budget: BudgetTypes.TBudgetDatabaseModel) => {
               budget.BudgetAmount = budgetAmount;
               budget.DateAsYearAndMonth = monthAndYear;
             },
           );
         });
-        Toast('Budget set successfully.');
+        Utils.makeToast('Budget set successfully.');
       } else {
         await WatermenlonDB.write(async () => {
           getBudget[0].update(budgetToUpdate => {
             budgetToUpdate.BudgetAmount = budgetAmount;
           });
         });
-        Toast('Budget update successfully.');
+        Utils.makeToast('Budget update successfully.');
       }
 
       // Logger.consoleLog('Set successfully.', 'warn');
-    } catch (err) {
-      Logger.consoleLog(err, 'error');
+    } catch (err: any) {
+      Utils.makeToast('Error while saving to Database' + err.message || '');
     }
     // }
   }

@@ -1,10 +1,11 @@
 import {Q} from '@nozbe/watermelondb';
 import {Alert} from 'react-native';
-import {DatabaseConfig} from '../../config';
-import {DayJs, Miscellaneous, Toast} from '../../utils';
 import {WatermenlonDB} from '../../..';
 import {BillOperations, CategoryOperations, BudgetOperations} from '.';
 import {BillTypes, BudgetTypes, CategoriesTypes} from '../../types';
+import {DateHelper} from '../../app/helper';
+import Utils from '../../app/utils';
+import {TABLES} from '../db.config';
 
 type DeleteType =
   | 'last_month'
@@ -16,15 +17,15 @@ type DeleteType =
 class CommonOperations {
   static columnName = 'DateAsYearAndMonth';
   static getBillsCollection() {
-    return WatermenlonDB.get(DatabaseConfig.tables.BudgetBills);
+    return WatermenlonDB.get(TABLES.BudgetBills);
   }
 
   static getBudgetCollection() {
-    return WatermenlonDB.get(DatabaseConfig.tables.Budget);
+    return WatermenlonDB.get(TABLES.Budget);
   }
 
   static getCategoryCollection() {
-    return WatermenlonDB.get(DatabaseConfig.tables.Categories);
+    return WatermenlonDB.get(TABLES.Categories);
   }
 
   static DeleteBills(deleteType: DeleteType) {
@@ -66,20 +67,20 @@ class CommonOperations {
       await WatermenlonDB.write(async () => {
         await WatermenlonDB.unsafeResetDatabase();
       });
-      Toast('Delete All Bills');
+      Utils.makeToast('Delete All Bills');
     } catch (err) {
-      Toast('Error');
+      Utils.makeToast('Error');
     }
   }
   static async _Delete1Month() {
-    const todayDate = DayJs.todayDate().toDate();
+    const todayDate = DateHelper.todayDate().toDate();
     const currentMonth = todayDate.getMonth();
     const currentYear = todayDate.getFullYear();
     const yearAndMonthOfBillToDelete = Number(
       `${currentMonth === 0 ? currentYear - 1 : currentYear}${
         currentMonth === 0
           ? 11
-          : Miscellaneous.MonthAccordingToDatahase(currentMonth - 1)
+          : DateHelper.monthAccordingToDatabase(currentMonth - 1)
       }`,
     );
     try {
@@ -95,19 +96,17 @@ class CommonOperations {
 
       this._DeleteHelper(bills, budget);
     } catch (err: any) {
-      Toast('Error while Deleting bill ' + err.message, 'LONG');
+      Utils.makeToast('Error while Deleting bill ' + err.message, 'LONG');
     }
   }
 
   static async _Delete3Month() {
-    const startRange = DayJs.subtractDate(3);
-    const endRange = DayJs.subtractDate(1);
-    const startMonth = Miscellaneous.MonthAccordingToDatahase(
+    const startRange = DateHelper.subtractDate(3);
+    const endRange = DateHelper.subtractDate(1);
+    const startMonth = DateHelper.monthAccordingToDatabase(
       startRange.getMonth(),
     );
-    const endMonth = Miscellaneous.MonthAccordingToDatahase(
-      endRange.getMonth(),
-    );
+    const endMonth = DateHelper.monthAccordingToDatabase(endRange.getMonth());
 
     const betweenRange = [
       Number(`${startRange.getFullYear()}${startMonth}`),
@@ -136,18 +135,17 @@ class CommonOperations {
 
       this._DeleteHelper(bills, budget);
     } catch (err: any) {
-      Toast('Error while Deleting bill ' + err.message, 'LONG');
+      Utils.makeToast('Error while Deleting bill ' + err.message, 'LONG');
     }
   }
 
   static async _Delete6Month() {
-    const startRange = DayJs.subtractDate(6);
-    const endRange = DayJs.subtractDate(1);
+    const startRange = DateHelper.subtractDate(6);
+    const endRange = DateHelper.subtractDate(1);
     const startMonth = startRange.getMonth();
-    const startMonthSanitize =
-      Miscellaneous.MonthAccordingToDatahase(startMonth);
+    const startMonthSanitize = DateHelper.monthAccordingToDatabase(startMonth);
     const endMonth = endRange.getMonth();
-    const endMonthSanitize = Miscellaneous.MonthAccordingToDatahase(endMonth);
+    const endMonthSanitize = DateHelper.monthAccordingToDatabase(endMonth);
     const betweenRange = [
       Number(`${startRange.getFullYear()}${startMonthSanitize}`),
       Number(`${endRange.getFullYear()}${endMonthSanitize}`),
@@ -175,12 +173,12 @@ class CommonOperations {
 
       this._DeleteHelper(bills, budget);
     } catch (err: any) {
-      Toast('Error while Deleting bill ' + err.message, 'LONG');
+      Utils.makeToast('Error while Deleting bill ' + err.message, 'LONG');
     }
   }
 
   static async _Delete1Year() {
-    const todayDate = DayJs.todayDate().toDate();
+    const todayDate = DateHelper.todayDate().toDate();
     const yearToDelete = todayDate.getFullYear() - 1;
     const betweenRange = [
       Number(`${yearToDelete}00`),
@@ -209,7 +207,7 @@ class CommonOperations {
 
       this._DeleteHelper(bills, budget);
     } catch (err: any) {
-      Toast('Error while Deleting bill ' + err.message, 'LONG');
+      Utils.makeToast('Error while Deleting bill ' + err.message, 'LONG');
     }
   }
 
@@ -227,7 +225,7 @@ class CommonOperations {
     await WatermenlonDB.write(async () => {
       await WatermenlonDB.batch(...deleteThings);
     });
-    Toast(`Deleted ${bills.length} Bills.`);
+    Utils.makeToast(`Deleted ${bills.length} Bills.`);
   }
 
   static async GetBillsCategoryBudget(
@@ -261,7 +259,7 @@ class CommonOperations {
         DBCategories: promise[2]!,
       };
     } catch (err) {
-      Toast('Error while getting data from database', 'LONG');
+      Utils.makeToast('Error while getting data from database', 'LONG');
     }
   }
 

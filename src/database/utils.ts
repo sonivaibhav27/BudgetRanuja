@@ -1,4 +1,4 @@
-import {UtilTypes} from '../types';
+import {BillTypes, CategoriesTypes, UtilTypes} from '../types';
 import {CategoryOperations} from './operations';
 
 export default class DbUtils {
@@ -30,5 +30,25 @@ export default class DbUtils {
       });
     });
     return groupedCategories;
+  };
+
+  static getCategoriesByCategoryType = (
+    type: 'income' | 'expense',
+    data: CategoriesTypes.TCategories[],
+  ) => data.filter(item => item.CategoryType! === type && item.IsDeleted === 0);
+
+  static assignCategoryName = (bills: BillTypes.TBill[]) => {
+    let returnedValues: BillTypes.TCSVBill[] = [];
+    const categories = CategoryOperations._rawDictionary;
+    for (let i = 0; i < bills.length; i++) {
+      const category = categories[bills[i].categoryId!];
+      if (category) {
+        returnedValues.push({
+          ...bills[i],
+          categoryName: category[0],
+        });
+      }
+    }
+    return returnedValues;
   };
 }

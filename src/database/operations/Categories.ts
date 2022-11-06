@@ -1,12 +1,9 @@
 import {Q} from '@nozbe/watermelondb';
-import {ExpenseCategories} from './../../data';
 import {WatermenlonDB} from '../../..';
-import {DatabaseConfig} from '../../config';
-import {Miscellaneous, Toast} from '../../utils';
-import IncomeCategories from '../../data/IncomeCategories';
 import {CategoriesTypes} from '../../types';
-
-const MAX_CATERGORY_ALLOWED = 16;
+import Utils from '../../app/utils';
+import {MAX_CATERGORY_ALLOWED, TABLES} from '../db.config';
+import {Data} from '../../app/assets';
 class Category {
   static _rawDictionary: {[key: string]: [string, string]};
   static colorCategoriesFromBackend = null;
@@ -14,26 +11,26 @@ class Category {
     return this._rawDictionary;
   }
   static getDBCollection() {
-    return WatermenlonDB.collections.get(DatabaseConfig.tables.Categories);
+    return WatermenlonDB.collections.get(TABLES.Categories);
   }
   static async UploadAllCategoriesInDB() {
-    const expenseCategories = ExpenseCategories;
+    const expenseCategories = Data.ExpenseCategories;
     let expenseCategoriesPrepareCreate = expenseCategories.map(category => {
       return WatermenlonDB.collections
-        .get(DatabaseConfig.tables.Categories)
+        .get(TABLES.Categories)
         .prepareCreate((model: CategoriesTypes.TCategoriesDatabaseModel) => {
-          model.CategoryId = Miscellaneous.GenerateUUID();
+          model.CategoryId = Utils.generateUUID();
           model.CategoryName = category.categoryName;
           model.IsDeleted = 0;
           model.CategoryColorCode = category.color;
           model.CategoryType = 2;
         });
     });
-    let incomeCategoriesPrepareCreate = IncomeCategories.map(category => {
+    let incomeCategoriesPrepareCreate = Data.IncomeCategories.map(category => {
       return WatermenlonDB.collections
-        .get(DatabaseConfig.tables.Categories)
+        .get(TABLES.Categories)
         .prepareCreate((model: CategoriesTypes.TCategoriesDatabaseModel) => {
-          model.CategoryId = Miscellaneous.GenerateUUID();
+          model.CategoryId = Utils.generateUUID();
           model.CategoryName = category.categoryName;
           model.IsDeleted = 0;
           model.CategoryColorCode = '';
@@ -50,7 +47,9 @@ class Category {
       });
       return true;
     } catch (err) {
-      Toast('Failed to insert initial data into Database, Kindly Press Ok.');
+      Utils.makeToast(
+        'Failed to insert initial data into Database, Kindly Press Ok.',
+      );
       return false;
     }
   }
@@ -86,7 +85,9 @@ class Category {
       this.createCategoryDictionary(santitizeCategoryData);
       return santitizeCategoryData;
     } catch (err) {
-      Toast('Error occur while loading categories, kindly reload the app.');
+      Utils.makeToast(
+        'Error occur while loading categories, kindly reload the app.',
+      );
     }
   }
 
@@ -97,16 +98,16 @@ class Category {
     isPremiumUser: boolean = false,
   ) {
     if (categoryName.length === 0) {
-      Toast("Can't save empty category name.", 'SHORT');
+      Utils.makeToast("Can't save empty category name.", 'SHORT');
       return;
     }
-    const categoryId = Miscellaneous.GenerateUUID();
+    const categoryId = Utils.generateUUID();
     const prevCategoryLength = await this.getDBCollection()
       .query()
       .fetchCount();
 
     if (!isPremiumUser && prevCategoryLength >= MAX_CATERGORY_ALLOWED) {
-      Toast(`Total Categories allowed are ${MAX_CATERGORY_ALLOWED}`);
+      Utils.makeToast(`Total Categories allowed are ${MAX_CATERGORY_ALLOWED}`);
       return;
     }
     const categoryType = type === 'expense' ? 2 : 1;
@@ -125,10 +126,10 @@ class Category {
       return await this.getAllCategories();
     } catch (err: any) {
       if (err.name === 'Diagnostic Error') {
-        Toast('Something went failed with database ' + err.message);
+        Utils.makeToast('Something went failed with database ' + err.message);
         return null;
       }
-      Toast(err.message);
+      Utils.makeToast(err.message);
       return null;
     }
   }
@@ -149,10 +150,10 @@ class Category {
             },
           );
         });
-        Toast('Successfully deleted.');
+        Utils.makeToast('Successfully deleted.');
       }
     } catch (err: any) {
-      Toast('Error while Deleting' + err.message, 'LONG');
+      Utils.makeToast('Error while Deleting' + err.message, 'LONG');
     }
   }
 
@@ -165,7 +166,7 @@ class Category {
       return;
     }
     if (newCategoryName.length === 0) {
-      Toast("New category can't be empty");
+      Utils.makeToast("New category can't be empty");
       return;
     }
     try {
@@ -173,7 +174,7 @@ class Category {
         .query(Q.where('Category_Id', Q.eq(categoryId)))
         .fetch();
       if (getCategoryFromDB.length > 1) {
-        Toast('Found more than one Categories with same Id');
+        Utils.makeToast('Found more than one Categories with same Id');
         return;
       }
       if (getCategoryFromDB.length === 0) {
@@ -193,11 +194,11 @@ class Category {
         ...this._rawDictionary,
         [categoryId]: [newCategoryName, categoryColor],
       };
-      Toast('Updated Successfully');
+      Utils.makeToast('Updated Successfully');
       return true;
     } catch (err) {
       console.log(err);
-      Toast('Failed to save category, please try again.');
+      Utils.makeToast('Failed to save category, please try again.');
       return false;
     }
   }

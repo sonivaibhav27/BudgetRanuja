@@ -1,9 +1,10 @@
 import {Q} from '@nozbe/watermelondb';
-import {DatabaseConfig} from '../../config';
-import {DayJs, Logger, Miscellaneous, Toast} from '../../utils';
 import {WatermenlonDB} from '../../..';
 import {BillTypes, UtilTypes} from '../../types';
 import {CategoryOperations} from '.';
+import Utils from '../../app/utils';
+import {DateHelper} from '../../app/helper';
+import {TABLES} from '../db.config';
 
 export const createBill = async (
   categoryId: string,
@@ -19,7 +20,7 @@ export const createBill = async (
     date === undefined ||
     amount === ''
   ) {
-    Toast('Data missing , please fill all mandatory field', 'LONG');
+    Utils.makeToast('Data missing , please fill all mandatory field', 'LONG');
     return;
   }
   try {
@@ -27,17 +28,17 @@ export const createBill = async (
     let record;
     if (isRepeatDaily) {
       let bills: BillTypes.TBillDatabaseModel[] = [];
-      const lastDateOfMonth = DayJs.getLastDayOfMonth();
+      const lastDateOfMonth = DateHelper.getLastDayOfMonth();
       for (let day = date.getDate(); day <= lastDateOfMonth; day++) {
         bills.push(
           WatermenlonDB.collections
-            .get(DatabaseConfig.tables.BudgetBills)
+            .get(TABLES.BudgetBills)
             .prepareCreate((model: BillTypes.TBillDatabaseModel) => {
               model.billAmount = +amount;
               model.categoryId = categoryId;
               model.billType = billType;
               model.billRemark = remark;
-              model.billMonthAndYear = DayJs.getCurrentYearAndMonth();
+              model.billMonthAndYear = DateHelper.getCurrentYearAndMonth();
               model.billDate = new Date(
                 date.getFullYear(),
                 date.getMonth(),
@@ -52,22 +53,21 @@ export const createBill = async (
     } else {
       await WatermenlonDB.write(async () => {
         record = await WatermenlonDB.collections
-          .get(DatabaseConfig.tables.BudgetBills)
+          .get(TABLES.BudgetBills)
           .create((budgetBills: BillTypes.TBillDatabaseModel) => {
             budgetBills.billAmount = +amount;
             budgetBills.categoryId = categoryId;
             budgetBills.billDate = date;
             budgetBills.billType = billType;
             budgetBills.billRemark = remark;
-            budgetBills.billMonthAndYear = DayJs.getCurrentYearAndMonth();
+            budgetBills.billMonthAndYear = DateHelper.getCurrentYearAndMonth();
           });
       });
     }
     return record;
   } catch (err) {
-    Logger.consoleLog(JSON.stringify(err), 'error');
     // Logger.trackLog(JSON.stringify(err));
-    Toast('Something went wrong.');
+    Utils.makeToast('Something went wrong.');
   }
 };
 
@@ -80,9 +80,7 @@ export const updateBill = async (
   categoryId: string,
 ) => {
   try {
-    const findModel = await WatermenlonDB.get(
-      DatabaseConfig.tables.BudgetBills,
-    ).find(id);
+    const findModel = await WatermenlonDB.get(TABLES.BudgetBills).find(id);
     if (findModel) {
       await WatermenlonDB.write(async () => {
         await findModel.update((model: BillTypes.TBillDatabaseModel) => {
@@ -93,30 +91,28 @@ export const updateBill = async (
           model.categoryId = categoryId;
         });
       });
-      Toast('Successfully updated the bill');
+      Utils.makeToast('Successfully updated the bill');
       return;
     }
     throw new Error('Id not found in database.');
   } catch (error: any) {
-    Toast('Error while updating the bill ' + error.message);
+    Utils.makeToast('Error while updating the bill ' + error.message);
   }
 };
 
 export const deleteBill = async (id: string) => {
   try {
-    const findModel = await WatermenlonDB.get(
-      DatabaseConfig.tables.BudgetBills,
-    ).find(id);
+    const findModel = await WatermenlonDB.get(TABLES.BudgetBills).find(id);
     if (findModel) {
       await WatermenlonDB.write(async () => {
         await findModel.destroyPermanently();
       });
-      Toast('Successfully deleted the bill');
+      Utils.makeToast('Successfully deleted the bill');
       return true;
     }
     throw new Error('Id not found in database.');
   } catch (error: any) {
-    Toast('Error while deleting the bill ' + error.message);
+    Utils.makeToast('Error while deleting the bill ' + error.message);
     return false;
   }
 };
@@ -125,7 +121,7 @@ export const getCurrentMonthBills = async (forYearAndMonth: number) => {
   try {
     let bills: BillTypes.TBillDatabaseModel[] | undefined;
     bills = await WatermenlonDB.collections
-      .get(DatabaseConfig.tables.BudgetBills)
+      .get(TABLES.BudgetBills)
       .query(Q.where('DateAsYearAndMonth', Q.eq(forYearAndMonth)))
       .fetch();
 
@@ -139,7 +135,6 @@ export const getCurrentMonthBills = async (forYearAndMonth: number) => {
       });
     return sanitizeOutputBills;
   } catch (err) {
-    Logger.consoleLog(`Error in Getting Bills. ${err}`, 'error');
     return null;
   }
 };
@@ -151,7 +146,7 @@ export const getBillsByCategoriesAndMonth = async (
   try {
     let bills: BillTypes.TBillDatabaseModel[] | undefined;
     bills = await WatermenlonDB.collections
-      .get(DatabaseConfig.tables.BudgetBills)
+      .get(TABLES.BudgetBills)
       .query(
         Q.and(
           Q.where('Category_Id', Q.eq(categoryId)),
@@ -171,22 +166,14 @@ export const getBillsByCategoriesAndMonth = async (
     });
     return sanitize;
   } catch (err) {
-    Logger.consoleLog('Error in getting individual Category ' + err, 'error');
     return [];
   }
 };
 
-export const generateReportData = async (date: Date, categoryName: string) => {
+export const generateReportData = async (date: Date, categoryId?: string) => {
   try {
-    let categoryId: string | undefined;
-    if (categoryName.length > 0) {
-      categoryId = Miscellaneous.findKeyByValue(categoryName);
-      if (typeof categoryId === 'undefined') {
-        throw Error('Something went wrong, please reload the app.');
-      }
-    }
-    const yearAndMonth = DayJs.getYearAndMonthFromDate(date);
-    let condition = categoryName
+    const yearAndMonth = DateHelper.getYearAndMonthFromDate(date);
+    let condition = categoryId
       ? Q.and(
           Q.where('DateAsYearAndMonth', Q.eq(yearAndMonth)),
           Q.where('Category_Id', Q.eq(categoryId!)),
@@ -194,7 +181,7 @@ export const generateReportData = async (date: Date, categoryName: string) => {
       : Q.where('DateAsYearAndMonth', Q.eq(yearAndMonth));
     let bills: BillTypes.TBillDatabaseModel[] | undefined;
     bills = await WatermenlonDB.collections
-      .get(DatabaseConfig.tables.BudgetBills)
+      .get(TABLES.BudgetBills)
       .query(condition, Q.sortBy('Date_at', Q.asc))
       .fetch();
     const sanitize: BillTypes.TCSVBill[] = bills.map(bill => {
@@ -210,7 +197,7 @@ export const generateReportData = async (date: Date, categoryName: string) => {
     });
     return sanitize;
   } catch (err) {
-    Toast('Error while getting record from database.');
+    Utils.makeToast('Error while getting record from database.');
   }
 };
 
@@ -220,7 +207,7 @@ export const getBillsByDateInDetailForCSV = async (
   try {
     let bills: BillTypes.TBillDatabaseModel[] | undefined;
     bills = await WatermenlonDB.collections
-      .get(DatabaseConfig.tables.BudgetBills)
+      .get(TABLES.BudgetBills)
       .query(
         Q.where('DateAsYearAndMonth', Q.eq(dateAsYearAndMonth)),
         Q.sortBy('Date_at', Q.asc),
@@ -239,6 +226,31 @@ export const getBillsByDateInDetailForCSV = async (
     });
     return sanitize;
   } catch (err) {
-    Toast('Error while getting record from database.');
+    Utils.makeToast('Error while getting record from database.');
   }
+};
+
+export const getNLatestRecord = async (
+  noOfRecords: number,
+  currentYearMonth: number,
+) => {
+  let bills: BillTypes.TBillDatabaseModel[] | undefined;
+  bills = await WatermenlonDB.collections
+    .get(TABLES.BudgetBills)
+    .query(
+      Q.where('DateAsYearAndMonth', currentYearMonth),
+      Q.take(noOfRecords),
+      Q.sortBy('Date_at', Q.desc),
+    )
+    .fetch();
+  const sanitize: BillTypes.TBill[] = bills.map(bill => {
+    return {
+      billAmount: bill.billAmount!,
+      billDate: bill.billDate!,
+      billRemark: bill.billRemark!,
+      categoryId: bill.categoryId!,
+      billType: bill.billType! === 1 ? 'income' : 'expense',
+    };
+  });
+  return sanitize;
 };

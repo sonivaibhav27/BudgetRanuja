@@ -6,3 +6,5 @@ export const TABLES = {
   Budget: 'budget',
   Categories: 'categories',
 };
+
+export const MAX_CATERGORY_ALLOWED = 16;
