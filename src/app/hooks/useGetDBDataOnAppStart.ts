@@ -33,7 +33,7 @@ export default () => {
           setCategoriesInRecoil(result.DBCategories);
         }
         const currency = await CurrencyOperations.getCurrency();
-        setCurrencyInRecoil(currency?.symbol || '$');
+        setCurrencyInRecoil(currency.symbol as string);
       }
       setLoading(false);
     } catch (err) {
