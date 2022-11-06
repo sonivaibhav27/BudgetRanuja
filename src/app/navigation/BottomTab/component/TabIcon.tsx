@@ -1,11 +1,11 @@
 import React from 'react';
 import {Animated, Easing, TouchableOpacity} from 'react-native';
-import {Icons} from '../../../utils';
+import {Icons} from '../../../helper';
 
 const ICON_SIZE = 24;
 type TabBarIconProps = {
   focused: boolean;
-  tabBarName: 'HomeStack' | 'BillDetailStack' | 'SettingStack' | 'Chart';
+  tabBarName: 'HomeStack' | 'DetailStack' | 'SettingStack' | 'ChartStack';
   color: string;
   routeKey: string;
   navigation: any;
@@ -14,7 +14,7 @@ type TabBarIconProps = {
 const GetIconClass = (type: TabBarIconProps['tabBarName']) => {
   return (props: TabBarIconProps) => {
     switch (type) {
-      case 'BillDetailStack':
+      case 'DetailStack':
         return (
           <Icons.Ionicons
             name={'receipt'}
@@ -30,7 +30,7 @@ const GetIconClass = (type: TabBarIconProps['tabBarName']) => {
             color={props.color}
           />
         );
-      case 'Chart':
+      case 'ChartStack':
         return (
           <Icons.Ionicons
             name={'pie-chart'}

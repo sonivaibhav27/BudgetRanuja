@@ -4,7 +4,7 @@ import {View} from 'react-native';
 import CommonStyles from '../styles';
 import BottomTab from './BottomTab';
 
-const App = () => {
+const NavigationRoot = () => {
   return (
     <View style={CommonStyles.flex1}>
       <NavigationContainer>
@@ -14,4 +14,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default NavigationRoot;
