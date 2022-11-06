@@ -1,11 +1,13 @@
 import React from 'react';
 import {StyleSheet, Text as RNText, TextStyle} from 'react-native';
 import {UtilTypes} from '../../../types';
+import {COLORS} from '../../theme';
 
 type TextProps = {
-  children: JSX.Element | JSX.Element[] | string;
-  style?: TextStyle;
+  children: JSX.Element | string | number | (string | JSX.Element)[];
+  style?: TextStyle | TextStyle[];
   textType: UtilTypes.TTextType;
+  numberOfLines?: number;
 };
 
 const returnStyleBasedOnTextType = (textType: TextProps['textType']) => {
@@ -25,7 +27,8 @@ const Text = (props: TextProps) => {
   const stylesBasedOnTextType = returnStyleBasedOnTextType(props.textType);
   return (
     <RNText
-      style={[props.style, stylesBasedOnTextType]}
+      numberOfLines={props.numberOfLines}
+      style={[stylesBasedOnTextType, props.style]}
       allowFontScaling={false}>
       {props.children}
     </RNText>
@@ -33,9 +36,25 @@ const Text = (props: TextProps) => {
 };
 
 const styles = StyleSheet.create({
-  heading: {},
-  subHeading: {},
-  normal: {},
-  paragraph: {},
+  heading: {
+    fontFamily: 'Poppins-SemiBold',
+    color: '#000000',
+    fontSize: 23,
+  },
+  subHeading: {
+    fontFamily: 'Poppins-SemiBold',
+    color: COLORS.black,
+    // top: 2,
+  },
+  normal: {
+    fontFamily: 'Poppins-Medium',
+    color: '#000000',
+    fontSize: 15,
+    // top: 2,
+  },
+  paragraph: {
+    fontFamily: 'Poppins-Regular',
+    color: '#000000',
+  },
 });
 export default Text;
