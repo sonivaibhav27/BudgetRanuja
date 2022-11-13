@@ -98,11 +98,14 @@ export default () => {
         return;
       }
       if (typeof billsData !== 'undefined') {
-        await BuildCsv(billsData, selectedCategory ? true : false);
+        await BuildCsv(
+          billsData,
+          typeof selectedCategory !== 'undefined' ? true : false,
+        );
+        Vibration.vibrate();
       }
-      Vibration.vibrate();
-    } catch (err) {
-      console.log(err);
+    } catch (err: any) {
+      Utils.makeToast('Failed to save csv', err.message);
     }
   };
 

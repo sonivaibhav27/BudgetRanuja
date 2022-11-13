@@ -20,7 +20,7 @@ const BottomTabNavigation = () => (
       headerStyle: {
         elevation: 1,
       },
-      tabBarActiveTintColor: COLORS.darkGray,
+      tabBarActiveTintColor: COLORS.white,
       tabBarInactiveTintColor: '#777',
       headerTitleStyle: {
         fontWeight: '600',

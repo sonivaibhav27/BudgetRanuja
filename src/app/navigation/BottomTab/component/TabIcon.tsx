@@ -1,8 +1,17 @@
 import React from 'react';
-import {Animated, Easing, TouchableOpacity} from 'react-native';
+import {
+  Animated,
+  Dimensions,
+  Easing,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {Text} from '../../../components';
 import {Icons} from '../../../helper';
+import {COLORS} from '../../../theme';
 
-const ICON_SIZE = 24;
+const ICON_SIZE = 22;
 type TabBarIconProps = {
   focused: boolean;
   tabBarName: 'HomeStack' | 'DetailStack' | 'SettingStack' | 'ChartStack';
@@ -11,13 +20,15 @@ type TabBarIconProps = {
   navigation: any;
 };
 
+const {width} = Dimensions.get('window');
+
 const GetIconClass = (type: TabBarIconProps['tabBarName']) => {
   return (props: TabBarIconProps) => {
     switch (type) {
       case 'DetailStack':
         return (
-          <Icons.Ionicons
-            name={'receipt'}
+          <Icons.Entypo
+            name={'documents'}
             size={ICON_SIZE}
             color={props.color}
           />
@@ -72,7 +83,7 @@ export default (props: TabBarIconProps) => {
   const Icon = GetIconClass(props.tabBarName);
   const scale = animated.interpolate({
     inputRange: [0, 1, 2],
-    outputRange: [1, 1.2, 1.4],
+    outputRange: [1, 1.1, 1.2],
     extrapolate: 'clamp',
   });
 
@@ -96,13 +107,46 @@ export default (props: TabBarIconProps) => {
         bottom: 5,
       }}
       onPress={onPress}
-      // eslint-disable-next-line react-native/no-inline-styles
-      style={{
-        transform: [{scale}],
-        alignItems: 'center',
-        flexDirection: 'row',
-      }}>
-      {Icon(props)}
+      style={[
+        styles.container,
+        {
+          transform: [{scale}],
+        },
+      ]}>
+      <View style={[styles.iconContainer, props.focused && styles.selected]}>
+        {Icon(props)}
+      </View>
+      <Text
+        textType={props.focused ? 'subheading' : 'normal'}
+        style={[
+          styles.textStyle,
+          {
+            color: props.focused ? COLORS.black : COLORS.mediumGray,
+          },
+        ]}>
+        {props.tabBarName.replace(/stack/gi, '')}
+      </Text>
     </AnimatedTouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  textStyle: {
+    fontSize: 8,
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  iconContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    alignSelf: 'center',
+  },
+  selected: {
+    backgroundColor: COLORS.primary,
+    width: ICON_SIZE + 10,
+    height: ICON_SIZE + 10,
+    borderRadius: 100,
+    justifyContent: 'center',
+  },
+  container: {width: (width - 20) / 4, alignSelf: 'center'},
+});

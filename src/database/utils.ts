@@ -32,10 +32,15 @@ export default class DbUtils {
     return groupedCategories;
   };
 
-  static getCategoriesByCategoryType = (
+  static getActiveCategoriesByCategoryType = (
     type: 'income' | 'expense',
     data: CategoriesTypes.TCategories[],
   ) => data.filter(item => item.CategoryType! === type && item.IsDeleted === 0);
+
+  static getAllCategoriesByCategoryType = (
+    type: 'income' | 'expense',
+    data: CategoriesTypes.TCategories[],
+  ) => data.filter(item => item.CategoryType! === type);
 
   static assignCategoryName = (bills: BillTypes.TBill[]) => {
     let returnedValues: BillTypes.TCSVBill[] = [];

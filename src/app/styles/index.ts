@@ -15,6 +15,10 @@ const CommonStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  displayRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
 });
 
 export default CommonStyles;

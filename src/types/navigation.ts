@@ -4,7 +4,7 @@ import {TCategories} from './category';
 export type TRootStackScreens = {
   BottomTabBarScreen: undefined;
   CreateEditScreen: {
-    categoryData?: TEditBill;
+    billData?: TEditBill;
     typeOfScreen: 'Edit' | 'Create';
   };
 };

@@ -162,6 +162,7 @@ export const getBillsByCategoriesAndMonth = async (
         billRemark: bill.billRemark!,
         categoryId: bill.categoryId!,
         id: bill.id,
+        billType: bill.billType,
       };
     });
     return sanitize;
