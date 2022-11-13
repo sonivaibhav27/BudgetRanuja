@@ -18,6 +18,7 @@ type Props = {
   title: string;
   data?: string[];
   children: JSX.Element | JSX.Element[];
+  isCurrentScreenFocused: boolean;
 };
 
 export default React.forwardRef<UtilTypes.TFullScreenModalRef, Props>(
@@ -30,20 +31,26 @@ export default React.forwardRef<UtilTypes.TFullScreenModalRef, Props>(
         useNativeDriver: true,
         easing: Easing.inOut(Easing.ease),
       }).start();
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    React.useEffect(() => {
       const backHander = BackHandler.addEventListener(
         'hardwareBackPress',
         () => {
-          console.log('Back Pressed');
-          _closeModal();
-          return true;
+          if (props.isCurrentScreenFocused) {
+            _closeModal();
+            return true;
+          }
+          return false;
         },
       );
       return () => {
         backHander.remove();
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
+    }, [props.isCurrentScreenFocused]);
     React.useImperativeHandle(
       ref,
       () => {

@@ -11,6 +11,10 @@ type Props = {
   headerRight?: JSX.Element;
   style?: ViewStyle;
   textStyle?: TextStyle;
+  iconStyle?: {
+    size: number;
+    color: string;
+  };
 };
 
 const getIconFamily = (iconFamily: Props['iconFamily']) => {
@@ -31,8 +35,8 @@ const IconButton = (props: Props) => {
           <Icon
             style={styles.iconStyle}
             name={props.iconName}
-            size={25}
-            color="#333"
+            size={props.iconStyle?.size}
+            color={props.iconStyle?.color}
           />
           {typeof props.text !== 'undefined' && (
             <Text
@@ -53,6 +57,10 @@ const IconButton = (props: Props) => {
 
 IconButton.defaultProps = {
   iconFamily: 'Entypo',
+  iconStyle: {
+    color: '#222',
+    size: 25,
+  },
 };
 
 const styles = StyleSheet.create({
@@ -72,6 +80,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     textTransform: 'capitalize',
     fontWeight: '500',
+    top: 2,
   },
   iconAndTextContainer: {
     flexDirection: 'row',
